@@ -1,5 +1,112 @@
-// Lightweight ICD lookup service for the front-end - Client-side search
+// Comprehensive ICD lookup service for the front-end - Client-side search
 import { icfCodes } from '../data/icfCodes';
+
+// Load full ICD-10-CM database
+let icd10Database = null;
+
+const loadICD10Database = async () => {
+  if (!icd10Database) {
+    try {
+      const response = await fetch('/icd10cm-tabular-2026.json');
+      const data = await response.json();
+      icd10Database = extractAllCodes(data);
+      console.log(`Loaded ${icd10Database.length} ICD-10-CM codes`);
+    } catch (error) {
+      console.error('Error loading ICD-10-CM database:', error);
+      icd10Database = [];
+    }
+  }
+  return icd10Database;
+};
+
+// Extract all codes from the complex JSON structure
+const extractAllCodes = (data) => {
+  const codes = [];
+  
+  const processSection = (section, chapterName = '') => {
+    if (!section) return;
+    
+    // Handle diag (diagnosis code)
+    if (section.diag) {
+      const diagArray = Array.isArray(section.diag) ? section.diag : [section.diag];
+      diagArray.forEach(diag => {
+        if (diag.name && diag.desc) {
+          codes.push({
+            code: diag.name,
+            description: diag.desc,
+            chapter: chapterName,
+            notes: extractNotes(diag)
+          });
+        }
+      });
+    }
+    
+    // Handle sectionRef
+    if (section.sectionRef) {
+      const sectionArray = Array.isArray(section.sectionRef) ? section.sectionRef : [section.sectionRef];
+      sectionArray.forEach(sec => processSection(sec, chapterName));
+    }
+    
+    // Handle nested sections
+    if (section.section) {
+      const secArray = Array.isArray(section.section) ? section.section : [section.section];
+      secArray.forEach(sec => processSection(sec, chapterName));
+    }
+  };
+  
+  // Process chapters
+  if (data.ICD10CM?.tabular?.chapter) {
+    const chapters = Array.isArray(data.ICD10CM.tabular.chapter) 
+      ? data.ICD10CM.tabular.chapter 
+      : [data.ICD10CM.tabular.chapter];
+    
+    chapters.forEach(chapter => {
+      const chapterName = chapter.desc || '';
+      
+      if (chapter.section) {
+        const sections = Array.isArray(chapter.section) ? chapter.section : [chapter.section];
+        sections.forEach(section => processSection(section, chapterName));
+      }
+      
+      if (chapter.sectionRef) {
+        const sectionRefs = Array.isArray(chapter.sectionRef) ? chapter.sectionRef : [chapter.sectionRef];
+        sectionRefs.forEach(sectionRef => processSection(sectionRef, chapterName));
+      }
+    });
+  }
+  
+  return codes;
+};
+
+// Extract notes from ICD code
+const extractNotes = (diag) => {
+  const notes = {};
+  
+  if (diag.includes) {
+    const includesArray = Array.isArray(diag.includes.note) ? diag.includes.note : [diag.includes.note];
+    notes.includes = includesArray.map(n => typeof n === 'string' ? n : n?.['#text'] || '').join(', ');
+  }
+  
+  if (diag.excludes1) {
+    const excludesArray = Array.isArray(diag.excludes1.note) ? diag.excludes1.note : [diag.excludes1.note];
+    notes.excludes1 = excludesArray.map(n => typeof n === 'string' ? n : n?.['#text'] || '').join(', ');
+  }
+  
+  if (diag.excludes2) {
+    const excludesArray = Array.isArray(diag.excludes2.note) ? diag.excludes2.note : [diag.excludes2.note];
+    notes.excludes2 = excludesArray.map(n => typeof n === 'string' ? n : n?.['#text'] || '').join(', ');
+  }
+  
+  if (diag.codeAlso) {
+    notes.codeAlso = typeof diag.codeAlso === 'string' ? diag.codeAlso : diag.codeAlso?.note || '';
+  }
+  
+  if (diag.useAdditionalCode) {
+    notes.useAdditionalCode = typeof diag.useAdditionalCode === 'string' ? diag.useAdditionalCode : diag.useAdditionalCode?.note || '';
+  }
+  
+  return notes;
+};
 
 // Advanced text matching score calculator with better differentiation
 const calculateScore = (text, query, code = '', isCode = false) => {
@@ -134,8 +241,31 @@ export const icdService = {
       }
     });
 
-    // 2) Search ICD-10-CM codes from comprehensive demo database
-    const icdDemo = [
+    // 2) Load and search complete ICD-10-CM database (72,000+ codes)
+    const icd10Codes = await loadICD10Database();
+    
+    icd10Codes.forEach(icdItem => {
+      const notesText = icdItem.notes ? Object.values(icdItem.notes).join(' ') : '';
+      const searchText = `${icdItem.description} ${icdItem.chapter} ${notesText}`;
+      const score = calculateScore(searchText, q, icdItem.code);
+      
+      if (score > 0.12) {
+        allResults.push({
+          code: icdItem.code,
+          description: icdItem.description,
+          source: 'ICD-10-CM',
+          chapter: icdItem.chapter,
+          notes: icdItem.notes || {},
+          match_snippet: icdItem.description,
+          score: score,
+        });
+      }
+    });
+
+    // 3) Fallback: Search demo database if main database failed to load
+    if (icd10Codes.length === 0) {
+      console.warn('Using fallback ICD-10-CM demo database');
+      const icdDemo = [
       { code: 'M54.5', description: 'Low back pain', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
         notes: { includes: 'Lumbar pain, Lower back pain, Lumbago NOS', excludes: 'Low back strain (S39.012), Sciatica (M54.3-M54.4)' },
         exercises: ['Lumbar extension', 'Bridging', 'Core activation', 'Pelvic tilts'] },
@@ -244,30 +374,197 @@ export const icdService = {
       { code: 'M43.6', description: 'Torticollis', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
         notes: { includes: 'Wry neck NOS', excludes: 'Congenital (sternomastoid) torticollis (Q68.0), Psychogenic torticollis (F45.8)' },
         exercises: ['Cervical ROM', 'Stretching', 'Postural retraining', 'Strengthening'] },
+      
+      // Additional Spine Conditions
+      { code: 'M47.816', description: 'Spondylosis without myelopathy or radiculopathy, lumbar region', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Arthritis of spine, Degenerative arthritis of spine', excludes: 'Spondylosis with myelopathy (M47.1-), Spondylosis with radiculopathy (M47.2-)' },
+        exercises: ['Spinal stabilization', 'Core strengthening', 'Flexibility exercises'] },
+      { code: 'M48.06', description: 'Spinal stenosis, lumbar region', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Narrowing of spinal canal', excludes: 'Spinal stenosis with neurogenic claudication (M48.062)' },
+        exercises: ['Flexion-based exercises', 'Walking program', 'Core stability'] },
+      { code: 'M50.20', description: 'Other cervical disc displacement, unspecified cervical region', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Cervical disc disorder', codeAlso: 'Myelopathy (G99.2), Radiculopathy (M54.1)' },
+        exercises: ['Cervical traction', 'Postural correction', 'Neck strengthening'] },
+      { code: 'M51.26', description: 'Other intervertebral disc displacement, lumbar region', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Lumbar disc herniation', excludes: 'Current traumatic disc displacement (S33.1)' },
+        exercises: ['McKenzie extension', 'Core stabilization', 'Neural mobilization'] },
+      
+      // Knee Conditions
+      { code: 'M17.11', description: 'Unilateral primary osteoarthritis, right knee', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Osteoarthritis of knee', excludes: 'Post-traumatic osteoarthritis (M17.3-)' },
+        exercises: ['Quadriceps strengthening', 'Hamstring flexibility', 'Balance training'] },
+      { code: 'M17.12', description: 'Unilateral primary osteoarthritis, left knee', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Osteoarthritis of knee', excludes: 'Post-traumatic osteoarthritis (M17.3-)' },
+        exercises: ['Quadriceps strengthening', 'Hamstring flexibility', 'Balance training'] },
+      { code: 'M23.91', description: 'Unspecified internal derangement of right knee', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Knee derangement NOS', excludes: 'Current injury - see injury of knee and lower leg (S80-S89)' },
+        exercises: ['Knee ROM', 'Strengthening', 'Functional training'] },
+      { code: 'M22.41', description: 'Chondromalacia patellae, right knee', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Patellofemoral syndrome', excludes: 'Chondromalacia patellae with current injury (S76.1-)' },
+        exercises: ['VMO strengthening', 'Patellar mobilization', 'Hip strengthening', 'Quadriceps flexibility'] },
+      { code: 'M76.5', description: 'Patellar tendinitis', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Jumper\'s knee', excludes: 'Rupture of patellar tendon (M66.0)' },
+        exercises: ['Eccentric training', 'Quadriceps strengthening', 'Jump training progression'] },
+      
+      // Hip Conditions
+      { code: 'M16.11', description: 'Unilateral primary osteoarthritis, right hip', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Degenerative hip disease', excludes: 'Bilateral hip osteoarthritis (M16.0)' },
+        exercises: ['Hip abduction', 'Gluteal strengthening', 'Hip flexor stretching'] },
+      { code: 'M16.12', description: 'Unilateral primary osteoarthritis, left hip', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Degenerative hip disease', excludes: 'Bilateral hip osteoarthritis (M16.0)' },
+        exercises: ['Hip abduction', 'Gluteal strengthening', 'Hip flexor stretching'] },
+      { code: 'M76.00', description: 'Gluteal tendinitis, unspecified hip', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Greater trochanter pain syndrome', excludes: 'Trochanteric bursitis (M70.6-)' },
+        exercises: ['Hip abductor strengthening', 'Gluteus medius exercises', 'Gait training'] },
+      { code: 'M24.75', description: 'Protrusio acetabuli', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Hip socket deformity', useAdditionalCode: 'Identify laterality' },
+        exercises: ['Hip ROM', 'Core stability', 'Protected weight bearing'] },
+      
+      // Shoulder Conditions
+      { code: 'M75.100', description: 'Unspecified rotator cuff tear or rupture of unspecified shoulder, not specified as traumatic', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Rotator cuff syndrome', excludes: 'Traumatic tear of rotator cuff (S46.01-)' },
+        exercises: ['Pendulum exercises', 'Progressive strengthening', 'Scapular stabilization'] },
+      { code: 'M75.0', description: 'Adhesive capsulitis of shoulder', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Frozen shoulder, Periarthritis of shoulder', excludes: 'Shoulder impingement syndrome (M75.4)' },
+        exercises: ['Capsular stretching', 'Joint mobilization', 'Progressive ROM'] },
+      { code: 'M75.4', description: 'Impingement syndrome of shoulder', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Subacromial syndrome', excludes: 'Rotator cuff syndrome (M75.1)' },
+        exercises: ['Scapular strengthening', 'Rotator cuff strengthening', 'Postural correction'] },
+      { code: 'M75.2', description: 'Bicipital tendinitis', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Inflammation of long head of biceps', excludes: 'Rupture of biceps tendon (M66.-)' },
+        exercises: ['Biceps tendon exercises', 'Shoulder stabilization', 'ROM exercises'] },
+      
+      // Elbow and Wrist
+      { code: 'M77.10', description: 'Lateral epicondylitis, unspecified elbow', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Tennis elbow', excludes: 'Lateral epicondylitis with rupture (M77.11)' },
+        exercises: ['Eccentric wrist exercises', 'Forearm strengthening', 'Grip strengthening'] },
+      { code: 'M77.00', description: 'Medial epicondylitis, unspecified elbow', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Golfer\'s elbow', excludes: 'Medial epicondylitis with rupture (M77.01)' },
+        exercises: ['Wrist flexor strengthening', 'Forearm stretching', 'Grip exercises'] },
+      { code: 'G56.00', description: 'Carpal tunnel syndrome, unspecified upper limb', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Median nerve entrapment', useAdditionalCode: 'Identify laterality' },
+        exercises: ['Nerve gliding', 'Tendon glides', 'Wrist strengthening', 'Ergonomic training'] },
+      { code: 'M25.531', description: 'Pain in right wrist', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Wrist arthralgia', excludes: 'Pain in hand (M79.64-)' },
+        exercises: ['Wrist ROM', 'Strengthening', 'Joint mobilization'] },
+      
+      // Ankle and Foot
+      { code: 'M25.571', description: 'Pain in right ankle and joints of right foot', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Ankle arthralgia', excludes: 'Pain in toe (M79.67-)' },
+        exercises: ['Ankle ROM', 'Balance training', 'Strengthening'] },
+      { code: 'M25.572', description: 'Pain in left ankle and joints of left foot', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Ankle arthralgia', excludes: 'Pain in toe (M79.67-)' },
+        exercises: ['Ankle ROM', 'Balance training', 'Strengthening'] },
+      { code: 'M77.30', description: 'Calcaneal spur, unspecified foot', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Heel spur', excludes: 'Plantar fasciitis (M72.2)' },
+        exercises: ['Plantar fascia stretching', 'Calf stretching', 'Foot intrinsics'] },
+      { code: 'M72.2', description: 'Plantar fascial fibromatosis', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Plantar fasciitis', excludes: 'Calcaneal spur (M77.3)' },
+        exercises: ['Plantar fascia stretching', 'Calf stretches', 'Arch strengthening', 'Night splinting'] },
+      { code: 'M76.6', description: 'Achilles tendinitis', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Tendinitis of Achilles tendon', excludes: 'Achilles tendon rupture (M66.2, S86.0)' },
+        exercises: ['Eccentric heel drops', 'Calf strengthening', 'Stretching', 'Progressive loading'] },
+      
+      // Neurological Conditions
+      { code: 'G81.10', description: 'Spastic hemiplegia affecting unspecified side', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Hemiparesis with spasticity', useAdditionalCode: 'Cause of hemiplegia' },
+        exercises: ['Spasticity management', 'Functional mobility', 'Task-specific training'] },
+      { code: 'G81.90', description: 'Hemiplegia, unspecified affecting right dominant side', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Paralysis of one side', useAdditionalCode: 'Underlying cause' },
+        exercises: ['Weight shifting', 'Gait training', 'ADL training', 'Balance exercises'] },
+      { code: 'G82.20', description: 'Paraplegia, unspecified', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Paralysis of both lower limbs', useAdditionalCode: 'Level of injury if known' },
+        exercises: ['Upper body strengthening', 'Transfer training', 'Wheelchair mobility', 'Pressure relief'] },
+      { code: 'G83.10', description: 'Monoplegia of lower limb affecting unspecified side', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Paralysis of one limb', useAdditionalCode: 'Underlying cause' },
+        exercises: ['Strengthening', 'Gait training', 'Balance exercises'] },
+      { code: 'G57.00', description: 'Lesion of sciatic nerve, unspecified lower limb', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Sciatic neuropathy', excludes: 'Sciatica due to intervertebral disc disorder (M54.4-)' },
+        exercises: ['Neural mobilization', 'Nerve gliding', 'Stretching', 'Strengthening'] },
+      
+      // Balance and Gait Disorders
+      { code: 'R26.81', description: 'Unsteadiness on feet', chapter: 'Symptoms, signs and abnormal clinical and laboratory findings (R00-R99)', 
+        notes: { includes: 'Balance difficulty', excludes: 'Vertigo (R42), Ataxia (R27.0)' },
+        exercises: ['Balance training', 'Gait training', 'Strengthening', 'Vestibular exercises'] },
+      { code: 'R26.89', description: 'Other abnormalities of gait and mobility', chapter: 'Symptoms, signs and abnormal clinical and laboratory findings (R00-R99)', 
+        notes: { includes: 'Gait abnormality NOS', excludes: 'Ataxia (R27.0)' },
+        exercises: ['Gait training', 'Coordination exercises', 'Strengthening'] },
+      { code: 'R27.0', description: 'Ataxia, unspecified', chapter: 'Symptoms, signs and abnormal clinical and laboratory findings (R00-R99)', 
+        notes: { includes: 'Coordination difficulty', excludes: 'Hereditary ataxia (G11.-)' },
+        exercises: ['Coordination training', 'Balance exercises', 'Functional activities'] },
+      { code: 'R29.6', description: 'Repeated falls', chapter: 'Symptoms, signs and abnormal clinical and laboratory findings (R00-R99)', 
+        notes: { includes: 'Falling, Tendency to fall', excludes: 'History of falling (Z91.81)' },
+        exercises: ['Fall prevention training', 'Balance exercises', 'Strengthening', 'Environmental modifications'] },
+      
+      // Post-Surgical Conditions
+      { code: 'Z96.641', description: 'Presence of right artificial hip joint', chapter: 'Factors influencing health status and contact with health services (Z00-Z99)', 
+        notes: { includes: 'Status post hip replacement', codeAlso: 'Complications if applicable' },
+        exercises: ['Hip ROM', 'Progressive strengthening', 'Gait training', 'Functional mobility'] },
+      { code: 'Z96.642', description: 'Presence of left artificial hip joint', chapter: 'Factors influencing health status and contact with health services (Z00-Z99)', 
+        notes: { includes: 'Status post hip replacement', codeAlso: 'Complications if applicable' },
+        exercises: ['Hip ROM', 'Progressive strengthening', 'Gait training', 'Functional mobility'] },
+      { code: 'Z96.651', description: 'Presence of right artificial knee joint', chapter: 'Factors influencing health status and contact with health services (Z00-Z99)', 
+        notes: { includes: 'Status post knee replacement', codeAlso: 'Complications if applicable' },
+        exercises: ['Knee ROM', 'Quadriceps strengthening', 'Gait training', 'Functional activities'] },
+      { code: 'Z96.652', description: 'Presence of left artificial knee joint', chapter: 'Factors influencing health status and contact with health services (Z00-Z99)', 
+        notes: { includes: 'Status post knee replacement', codeAlso: 'Complications if applicable' },
+        exercises: ['Knee ROM', 'Quadriceps strengthening', 'Gait training', 'Functional activities'] },
+      { code: 'Z98.89', description: 'Other specified postprocedural states', chapter: 'Factors influencing health status and contact with health services (Z00-Z99)', 
+        notes: { includes: 'Status post surgery NOS', useAdditionalCode: 'Identify specific procedure' },
+        exercises: ['Progressive mobility', 'Strengthening', 'Functional restoration'] },
+      
+      // Fractures and Injuries
+      { code: 'S72.001A', description: 'Fracture of unspecified part of neck of right femur, initial encounter', chapter: 'Injury, poisoning and certain other consequences of external causes (S00-T88)', 
+        notes: { includes: 'Hip fracture', useAdditionalCode: 'Cause of injury (W00-Y99)' },
+        exercises: ['Protected weight bearing', 'Hip ROM', 'Progressive strengthening', 'Gait training'] },
+      { code: 'S82.001A', description: 'Unspecified fracture of right patella, initial encounter', chapter: 'Injury, poisoning and certain other consequences of external causes (S00-T88)', 
+        notes: { includes: 'Broken kneecap', excludes: 'Traumatic amputation of lower leg (S88.-)' },
+        exercises: ['Quadriceps sets', 'Knee ROM', 'Progressive strengthening'] },
+      { code: 'S42.001A', description: 'Fracture of unspecified part of right clavicle, initial encounter', chapter: 'Injury, poisoning and certain other consequences of external causes (S00-T88)', 
+        notes: { includes: 'Broken collarbone', useAdditionalCode: 'Cause of injury' },
+        exercises: ['Pendulum exercises', 'Elbow ROM', 'Progressive shoulder strengthening'] },
+      { code: 'S52.501A', description: 'Unspecified fracture of the lower end of right radius, initial encounter', chapter: 'Injury, poisoning and certain other consequences of external causes (S00-T88)', 
+        notes: { includes: 'Distal radius fracture, Colles fracture', excludes: 'Physeal fractures of lower end of radius (S59.2-)' },
+        exercises: ['Wrist ROM', 'Grip strengthening', 'Forearm exercises'] },
+      
+      // Chronic Pain Conditions
+      { code: 'G89.4', description: 'Chronic pain syndrome', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Chronic pain associated with trauma or psychosocial dysfunction', codeAlso: 'Associated psychological factors (F45.42)' },
+        exercises: ['Pain management', 'Graded exercise', 'Functional restoration', 'Cognitive behavioral approaches'] },
+      { code: 'G89.21', description: 'Chronic pain due to trauma', chapter: 'Diseases of the nervous system (G00-G99)', 
+        notes: { includes: 'Post-traumatic pain', codeAlso: 'Site of pain' },
+        exercises: ['Graded activity', 'Pain neuroscience education', 'Functional exercises'] },
+      { code: 'M79.604', description: 'Pain in right leg', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Leg pain NOS', excludes: 'Pain in limb associated with diabetic neuropathy (E10-E13 with .42)' },
+        exercises: ['Stretching', 'Strengthening', 'Activity modification'] },
+      { code: 'M79.605', description: 'Pain in left leg', chapter: 'Diseases of the musculoskeletal system and connective tissue (M00-M99)', 
+        notes: { includes: 'Leg pain NOS', excludes: 'Pain in limb associated with diabetic neuropathy (E10-E13 with .42)' },
+        exercises: ['Stretching', 'Strengthening', 'Activity modification'] },
     ];
 
-    icdDemo.forEach(icdItem => {
-      // Include code, description, chapter, and notes in search
-      const notesText = icdItem.notes ? Object.values(icdItem.notes).join(' ') : '';
-      const searchText = `${icdItem.description} ${icdItem.chapter} ${notesText}`;
-      const score = calculateScore(searchText, q, icdItem.code);
-      
-      if (score > 0.12) {
-        allResults.push({
-          code: icdItem.code,
-          description: icdItem.description,
-          source: 'ICD-10-CM',
-          chapter: icdItem.chapter,
-          notes: icdItem.notes || {},
-          match_snippet: icdItem.description,
-          score: score,
-        });
-      }
-    });
+      icdDemo.forEach(icdItem => {
+        // Include code, description, chapter, and notes in search
+        const notesText = icdItem.notes ? Object.values(icdItem.notes).join(' ') : '';
+        const searchText = `${icdItem.description} ${icdItem.chapter} ${notesText}`;
+        const score = calculateScore(searchText, q, icdItem.code);
+        
+        if (score > 0.12) {
+          allResults.push({
+            code: icdItem.code,
+            description: icdItem.description,
+            source: 'ICD-10-CM',
+            chapter: icdItem.chapter,
+            notes: icdItem.notes || {},
+            match_snippet: icdItem.description,
+            score: score,
+          });
+        }
+      });
+    }
 
-    // Sort by score (highest first) and return top 40
+    // Sort by score (highest first) and return top 50
     allResults.sort((a, b) => b.score - a.score);
-    return allResults.slice(0, 40);
+    return allResults.slice(0, 50);
   }
 };
 
