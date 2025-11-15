@@ -1,0 +1,45 @@
+{
+  "name": "hospital-management-app",
+  "version": "1.0.0",
+  "description": "Comprehensive Hospital Management System for patient appointments and physiotherapy care",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+  "start:icd-api": "python -u ./icd_lookup/unified_icd_icf_api.py --icd-json ./icd_lookup/icd10_data/icd10cm-tabular-2026.json --icf-file ./icd_lookup/icf_source/LinearizationMiniOutput-ICF-en.txt --port 5000",
+  "setup:icd": "powershell -ExecutionPolicy Bypass -File ./scripts/copy_icd_to_public.ps1",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "lucide-react": "^0.263.1",
+    "axios": "^1.4.0",
+    "date-fns": "^2.30.0",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.24",
+    "autoprefixer": "^10.4.14"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
