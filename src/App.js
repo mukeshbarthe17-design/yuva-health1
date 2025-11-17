@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, User, FileText, Activity, CreditCard, Clock, Phone, Mail, MapPin, Plus, Save, LogOut, Home } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Calendar, User, FileText, Activity, CreditCard, Clock, Phone, Mail, MapPin, Plus, Save, LogOut, Home, Download } from 'lucide-react';
 import { Button, Card, Badge } from './components/UI';
 import Alert from './components/Alert';
 import LoadingSpinner from './components/LoadingSpinner';
 import { TextInput, TextArea, SelectInput } from './components/FormComponents';
+import AppointmentForm from './components/AppointmentForm';
 import { validateAppointmentForm, validateRegistrationForm, validateLoginForm } from './utils/validation';
 import { appointmentService } from './services/appointmentService';
 import { patientService } from './services/patientService';
@@ -25,9 +26,19 @@ const HospitalManagementApp = () => {
   
   // Form states
   const [formData, setFormData] = useState({
-    name: '', age: '', dob: '', gender: '', phone: '', email: '', address: '',
-    emergencyContact: '', emergencyPhone: '', appointmentDate: '', appointmentTime: '',
-    department: '', issue: ''
+    name: '',
+    age: '',
+    dob: '',
+    gender: '',
+    phone: '',
+    email: '',
+    address: '',
+    emergencyContact: '',
+    emergencyPhone: '',
+    appointmentDate: '',
+    appointmentTime: '',
+    department: '',
+    issue: ''
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -51,11 +62,28 @@ const HospitalManagementApp = () => {
   }, [patients]);
   
   // Helper function to show alerts
-  const showAlert = (type, message) => {
+  const showAlert = useCallback((type, message) => {
     setAlertState({ show: true, type, message });
-  };
+  }, []);
+
+  // Memoized change handlers for form fields
+  const formChangeHandlers = useMemo(() => ({
+    name: (e) => setFormData(prev => ({...prev, name: e.target.value})),
+    age: (e) => setFormData(prev => ({...prev, age: e.target.value})),
+    dob: (e) => setFormData(prev => ({...prev, dob: e.target.value})),
+    gender: (e) => setFormData(prev => ({...prev, gender: e.target.value})),
+    phone: (e) => setFormData(prev => ({...prev, phone: e.target.value})),
+    email: (e) => setFormData(prev => ({...prev, email: e.target.value})),
+    address: (e) => setFormData(prev => ({...prev, address: e.target.value})),
+    emergencyContact: (e) => setFormData(prev => ({...prev, emergencyContact: e.target.value})),
+    emergencyPhone: (e) => setFormData(prev => ({...prev, emergencyPhone: e.target.value})),
+    appointmentDate: (e) => setFormData(prev => ({...prev, appointmentDate: e.target.value})),
+    appointmentTime: (e) => setFormData(prev => ({...prev, appointmentTime: e.target.value})),
+    department: (e) => setFormData(prev => ({...prev, department: e.target.value})),
+    issue: (e) => setFormData(prev => ({...prev, issue: e.target.value}))
+  }), []);
   
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     const validation = validateAppointmentForm(formData);
     
@@ -68,6 +96,24 @@ const HospitalManagementApp = () => {
     // Store pending patient and go to registration
     // Generate next ID properly (max existing ID + 1)
     const nextId = patients.length > 0 ? Math.max(...patients.map(p => p.id)) + 1 : 1;
+    
+    // Store uploaded file if exists
+    const fileData = e.target.querySelector('input[type="file"]')?.files[0];
+    if (fileData) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64File = event.target.result;
+        localStorage.setItem(`patient_${nextId}_report`, JSON.stringify({
+          name: fileData.name,
+          type: fileData.type,
+          size: fileData.size,
+          data: base64File,
+          uploadDate: new Date().toISOString()
+        }));
+      };
+      reader.readAsDataURL(fileData);
+    }
+    
     const newPatient = {
       id: nextId,
       name: formData.name,
@@ -81,16 +127,17 @@ const HospitalManagementApp = () => {
       emergencyPhone: formData.emergencyPhone,
       appointmentDate: formData.appointmentDate,
       appointmentTime: formData.appointmentTime,
-      department: formData.department,
+      department: formData.department || 'general',
       issue: formData.issue,
-      status: 'pending'
+      status: 'pending',
+      hasPreviousReport: !!fileData
     };
     
     console.log('Creating pending patient with ID:', nextId, 'Form data:', formData);
     localStorage.setItem('pendingPatient', JSON.stringify(newPatient));
     showAlert('info', 'Appointment details saved. Please complete your registration.');
     setTimeout(() => setCurrentPage('register'), 1000);
-  };
+  }, [formData, patients, showAlert]);
   
   // Home Page
   const HomePage = () => {
@@ -142,7 +189,9 @@ const HospitalManagementApp = () => {
     );
   };
   
-  const AppointmentForm = () => {
+  // AppointmentForm is now imported from separate file
+
+  const AppointmentFormOLD = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-8">
@@ -163,136 +212,208 @@ const HospitalManagementApp = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
-              <TextInput
-                label="Full Name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                error={errors.name}
-              />
-              <TextInput
-                label="Age"
-                type="number"
-                required
-                value={formData.age}
-                onChange={(e) => setFormData({...formData, age: e.target.value})}
-                error={errors.age}
-              />
-              <TextInput
-                label="Date of Birth"
-                type="date"
-                required
-                value={formData.dob}
-                onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                error={errors.dob}
-              />
-              <SelectInput
-                label="Gender"
-                required
-                value={formData.gender}
-                onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                options={[
-                  { value: '', label: 'Select' },
-                  { value: 'male', label: 'Male' },
-                  { value: 'female', label: 'Female' },
-                  { value: 'other', label: 'Other' }
-                ]}
-                error={errors.gender}
-              />
-              <TextInput
-                label="Phone"
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                error={errors.phone}
-              />
-              <TextInput
-                label="Email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                error={errors.email}
-              />
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Full Name<span className="text-red-600 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Age<span className="text-red-600 ml-1">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={formData.age}
+                  onChange={(e) => setFormData(prev => ({...prev, age: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                {errors.age && <p className="text-red-600 text-sm mt-1">{errors.age}</p>}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Date of Birth<span className="text-red-600 ml-1">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.dob}
+                  onChange={(e) => setFormData(prev => ({...prev, dob: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                {errors.dob && <p className="text-red-600 text-sm mt-1">{errors.dob}</p>}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Gender<span className="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  value={formData.gender}
+                  onChange={(e) => setFormData(prev => ({...prev, gender: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                {errors.gender && <p className="text-red-600 text-sm mt-1">{errors.gender}</p>}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Phone<span className="text-red-600 ml-1">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email<span className="text-red-600 ml-1">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+              </div>
             </div>
 
-            <TextArea
-              label="Address"
-              required
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
-              error={errors.address}
-              rows="3"
-            />
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Address<span className="text-red-600 ml-1">*</span>
+              </label>
+              <textarea
+                value={formData.address}
+                onChange={(e) => setFormData(prev => ({...prev, address: e.target.value}))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="3"
+                required
+              />
+              {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
+            </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <TextInput
-                label="Emergency Contact Name"
-                value={formData.emergencyContact}
-                onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})}
-              />
-              <TextInput
-                label="Emergency Phone"
-                type="tel"
-                value={formData.emergencyPhone}
-                onChange={(e) => setFormData({...formData, emergencyPhone: e.target.value})}
-              />
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Emergency Contact Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.emergencyContact}
+                  onChange={(e) => setFormData(prev => ({...prev, emergencyContact: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Emergency Phone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.emergencyPhone}
+                  onChange={(e) => setFormData(prev => ({...prev, emergencyPhone: e.target.value}))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
 
             <div className="border-t pt-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Appointment Details</h3>
               <div className="grid md:grid-cols-2 gap-6">
-                <TextInput
-                  label="Preferred Date"
-                  type="date"
-                  required
-                  value={formData.appointmentDate}
-                  onChange={(e) => setFormData({...formData, appointmentDate: e.target.value})}
-                  error={errors.appointmentDate}
-                />
-                <SelectInput
-                  label="Preferred Time"
-                  required
-                  value={formData.appointmentTime}
-                  onChange={(e) => setFormData({...formData, appointmentTime: e.target.value})}
-                  options={[
-                    { value: '', label: 'Select Time' },
-                    { value: '09:00', label: '09:00 AM' },
-                    { value: '10:00', label: '10:00 AM' },
-                    { value: '11:00', label: '11:00 AM' },
-                    { value: '14:00', label: '02:00 PM' },
-                    { value: '15:00', label: '03:00 PM' },
-                    { value: '16:00', label: '04:00 PM' }
-                  ]}
-                  error={errors.appointmentTime}
-                />
-                <SelectInput
-                  label="Department"
-                  required
-                  value={formData.department}
-                  onChange={(e) => setFormData({...formData, department: e.target.value})}
-                  options={[
-                    { value: '', label: 'Select Department' },
-                    { value: 'cardiology', label: 'Cardiology' },
-                    { value: 'neurology', label: 'Neurology' },
-                    { value: 'orthopedics', label: 'Orthopedics' },
-                    { value: 'pediatrics', label: 'Pediatrics' },
-                    { value: 'general', label: 'General Medicine' }
-                  ]}
-                  error={errors.department}
-                />
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Preferred Date<span className="text-red-600 ml-1">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.appointmentDate}
+                    onChange={(e) => setFormData(prev => ({...prev, appointmentDate: e.target.value}))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                  {errors.appointmentDate && <p className="text-red-600 text-sm mt-1">{errors.appointmentDate}</p>}
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Preferred Time<span className="text-red-600 ml-1">*</span>
+                  </label>
+                  <select
+                    value={formData.appointmentTime}
+                    onChange={(e) => setFormData(prev => ({...prev, appointmentTime: e.target.value}))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select Time</option>
+                    <option value="09:00">09:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="14:00">02:00 PM</option>
+                    <option value="15:00">03:00 PM</option>
+                    <option value="16:00">04:00 PM</option>
+                  </select>
+                  {errors.appointmentTime && <p className="text-red-600 text-sm mt-1">{errors.appointmentTime}</p>}
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Department<span className="text-red-600 ml-1">*</span>
+                  </label>
+                  <select
+                    value={formData.department}
+                    onChange={(e) => setFormData(prev => ({...prev, department: e.target.value}))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select Department</option>
+                    <option value="cardiology">Cardiology</option>
+                    <option value="neurology">Neurology</option>
+                    <option value="orthopedics">Orthopedics</option>
+                    <option value="pediatrics">Pediatrics</option>
+                    <option value="general">General Medicine</option>
+                  </select>
+                  {errors.department && <p className="text-red-600 text-sm mt-1">{errors.department}</p>}
+                </div>
               </div>
               <div className="mt-6">
-                <TextArea
-                  label="Chief Complaint / Reason for Visit"
-                  required
-                  value={formData.issue}
-                  onChange={(e) => setFormData({...formData, issue: e.target.value})}
-                  error={errors.issue}
-                  rows="3"
-                  placeholder="Describe your symptoms or reason for appointment"
-                />
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Chief Complaint / Reason for Visit<span className="text-red-600 ml-1">*</span>
+                  </label>
+                  <textarea
+                    value={formData.issue}
+                    onChange={(e) => setFormData(prev => ({...prev, issue: e.target.value}))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows="3"
+                    placeholder="Describe your symptoms or reason for appointment"
+                    required
+                  />
+                  {errors.issue && <p className="text-red-600 text-sm mt-1">{errors.issue}</p>}
+                </div>
               </div>
             </div>
 
@@ -371,7 +492,7 @@ const HospitalManagementApp = () => {
               type="email"
               required
               value={credentials.email}
-              onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+              onChange={(e) => setCredentials(prev => ({...prev, email: e.target.value}))}
               error={errors.email}
             />
             <TextInput
@@ -379,7 +500,7 @@ const HospitalManagementApp = () => {
               type="password"
               required
               value={credentials.password}
-              onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+              onChange={(e) => setCredentials(prev => ({...prev, password: e.target.value}))}
               error={errors.password}
             />
             <TextInput
@@ -387,7 +508,7 @@ const HospitalManagementApp = () => {
               type="password"
               required
               value={credentials.confirmPassword}
-              onChange={(e) => setCredentials({...credentials, confirmPassword: e.target.value})}
+              onChange={(e) => setCredentials(prev => ({...prev, confirmPassword: e.target.value}))}
               error={errors.confirmPassword}
             />
             <Button type="submit" fullWidth>
@@ -464,7 +585,7 @@ const HospitalManagementApp = () => {
               type="email"
               required
               value={loginData.email}
-              onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+              onChange={(e) => setLoginData(prev => ({...prev, email: e.target.value}))}
               error={errors.email}
             />
             <TextInput
@@ -472,11 +593,11 @@ const HospitalManagementApp = () => {
               type="password"
               required
               value={loginData.password}
-              onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+              onChange={(e) => setLoginData(prev => ({...prev, password: e.target.value}))}
               error={errors.password}
             />
             <Button type="submit" fullWidth>
-              Login
+              Sign in
             </Button>
           </form>
 
@@ -654,7 +775,7 @@ const HospitalManagementApp = () => {
 
           <Card className="overflow-hidden">
             <div className="flex border-b">
-              {['profile', 'careplan', 'appointments'].map((tab) => (
+              {['profile', 'careplan', 'appointments', 'reports'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -662,8 +783,8 @@ const HospitalManagementApp = () => {
                 >
                   {tab === 'profile' && <User className="inline mr-2" size={20} />}
                   {tab === 'careplan' && <Activity className="inline mr-2" size={20} />}
-                  {tab === 'careplan' && <Activity className="inline mr-2" size={20} />}
                   {tab === 'appointments' && <Calendar className="inline mr-2" size={20} />}
+                  {tab === 'reports' && <FileText className="inline mr-2" size={20} />}
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
               ))}
@@ -713,14 +834,14 @@ const HospitalManagementApp = () => {
                     <TextArea
                       label="Chief Complaint"
                       value={assessmentData.chiefComplaint}
-                      onChange={(e) => setAssessmentData({...assessmentData, chiefComplaint: e.target.value})}
+                      onChange={(e) => setAssessmentData(prev => ({...prev, chiefComplaint: e.target.value}))}
                       rows="3"
                       placeholder="Main reason for visit"
                     />
                     <TextArea
                       label="Presenting Complaint/Needs"
                       value={assessmentData.presentingComplaint}
-                      onChange={(e) => setAssessmentData({...assessmentData, presentingComplaint: e.target.value})}
+                      onChange={(e) => setAssessmentData(prev => ({...prev, presentingComplaint: e.target.value}))}
                       rows="3"
                       placeholder="Detailed symptoms"
                     />
@@ -729,19 +850,19 @@ const HospitalManagementApp = () => {
                       <TextInput
                         label="Blood Pressure"
                         value={assessmentData.bloodPressure}
-                        onChange={(e) => setAssessmentData({...assessmentData, bloodPressure: e.target.value})}
+                        onChange={(e) => setAssessmentData(prev => ({...prev, bloodPressure: e.target.value}))}
                         placeholder="120/80 mmHg"
                       />
                       <TextInput
                         label="Heart Rate"
                         value={assessmentData.heartRate}
-                        onChange={(e) => setAssessmentData({...assessmentData, heartRate: e.target.value})}
+                        onChange={(e) => setAssessmentData(prev => ({...prev, heartRate: e.target.value}))}
                         placeholder="72 bpm"
                       />
                       <TextInput
                         label="Temperature"
                         value={assessmentData.temperature}
-                        onChange={(e) => setAssessmentData({...assessmentData, temperature: e.target.value})}
+                        onChange={(e) => setAssessmentData(prev => ({...prev, temperature: e.target.value}))}
                         placeholder="98.6°F"
                       />
                     </div>
@@ -864,6 +985,68 @@ const HospitalManagementApp = () => {
                       <p>No appointments scheduled</p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'reports' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Previous Medical Reports</h2>
+                  {(() => {
+                    const reportKey = `patient_${currentUser.id}_report`;
+                    const reportData = localStorage.getItem(reportKey);
+                    if (reportData) {
+                      const report = JSON.parse(reportData);
+                      return (
+                        <Card className="border border-gray-200">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center space-x-3">
+                                <FileText className="text-blue-600" size={24} />
+                                <div>
+                                  <h3 className="font-semibold text-lg">{report.name}</h3>
+                                  <p className="text-sm text-gray-600">
+                                    Uploaded: {new Date(report.uploadDate).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Size: {(report.size / 1024).toFixed(2)} KB
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                icon={Download}
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = report.data;
+                                  link.download = report.name;
+                                  link.click();
+                                }}
+                              >
+                                Download
+                              </Button>
+                            </div>
+                            {report.type.startsWith('image/') && (
+                              <div className="mt-4">
+                                <img
+                                  src={report.data}
+                                  alt="Medical Report"
+                                  className="max-w-full h-auto border border-gray-300 rounded-lg"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    } else {
+                      return (
+                        <div className="text-center py-12 text-gray-500">
+                          <FileText className="mx-auto mb-4 text-gray-400" size={48} />
+                          <p>No previous reports uploaded</p>
+                          <p className="text-sm mt-2">Upload reports when booking an appointment</p>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
               )}
             </div>
@@ -1172,14 +1355,67 @@ const HospitalManagementApp = () => {
                       </div>
                     </div>
 
+                    {/* Previous Reports Section */}
+                    {selectedPatient.hasPreviousReport && (() => {
+                      const reportKey = `patient_${selectedPatient.id}_report`;
+                      const reportData = localStorage.getItem(reportKey);
+                      if (reportData) {
+                        const report = JSON.parse(reportData);
+                        return (
+                          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h3 className="font-bold mb-3 flex items-center">
+                              <FileText className="mr-2 text-blue-600" size={20} />
+                              Previous Medical Report
+                            </h3>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <FileText className="text-blue-600" size={24} />
+                                <div>
+                                  <h4 className="font-semibold">{report.name}</h4>
+                                  <p className="text-sm text-gray-600">
+                                    Uploaded: {new Date(report.uploadDate).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Size: {(report.size / 1024).toFixed(2)} KB
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                icon={Download}
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = report.data;
+                                  link.download = report.name;
+                                  link.click();
+                                }}
+                              >
+                                Download
+                              </Button>
+                            </div>
+                            {report.type.startsWith('image/') && (
+                              <div className="mt-4">
+                                <img
+                                  src={report.data}
+                                  alt="Medical Report Preview"
+                                  className="max-w-full h-64 object-contain border border-gray-300 rounded-lg bg-white"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                    })()}
+
                     <div>
                       <h3 className="font-bold mb-2">Assessment</h3>
-                      <TextArea label="Chief Complaint" value={patientAssessment.chiefComplaint} onChange={(e)=>setPatientAssessment({...patientAssessment, chiefComplaint: e.target.value})} rows="2" />
-                      <TextArea label="Presenting Complaint" value={patientAssessment.presentingComplaint} onChange={(e)=>setPatientAssessment({...patientAssessment, presentingComplaint: e.target.value})} rows="2" />
+                      <TextArea label="Chief Complaint" value={patientAssessment.chiefComplaint} onChange={(e)=>setPatientAssessment(prev => ({...prev, chiefComplaint: e.target.value}))} rows="2" />
+                      <TextArea label="Presenting Complaint" value={patientAssessment.presentingComplaint} onChange={(e)=>setPatientAssessment(prev => ({...prev, presentingComplaint: e.target.value}))} rows="2" />
                       <div className="grid md:grid-cols-3 gap-4 mt-3">
-                        <TextInput label="Blood Pressure" value={patientAssessment.bloodPressure} onChange={(e)=>setPatientAssessment({...patientAssessment, bloodPressure: e.target.value})} />
-                        <TextInput label="Heart Rate" value={patientAssessment.heartRate} onChange={(e)=>setPatientAssessment({...patientAssessment, heartRate: e.target.value})} />
-                        <TextInput label="Temperature" value={patientAssessment.temperature} onChange={(e)=>setPatientAssessment({...patientAssessment, temperature: e.target.value})} />
+                        <TextInput label="Blood Pressure" value={patientAssessment.bloodPressure} onChange={(e)=>setPatientAssessment(prev => ({...prev, bloodPressure: e.target.value}))} />
+                        <TextInput label="Heart Rate" value={patientAssessment.heartRate} onChange={(e)=>setPatientAssessment(prev => ({...prev, heartRate: e.target.value}))} />
+                        <TextInput label="Temperature" value={patientAssessment.temperature} onChange={(e)=>setPatientAssessment(prev => ({...prev, temperature: e.target.value}))} />
                       </div>
                     </div>
 
@@ -1381,21 +1617,21 @@ const HospitalManagementApp = () => {
                         <TextArea 
                           label="Short Term Goals" 
                           value={carePlanInput.shortTermGoals} 
-                          onChange={(e)=>setCarePlanInput({...carePlanInput, shortTermGoals: e.target.value})} 
+                          onChange={(e)=>setCarePlanInput(prev => ({...prev, shortTermGoals: e.target.value}))} 
                           rows="2"
                           placeholder="e.g., Reduce pain, Improve mobility"
                         />
                         <TextArea 
                           label="Long Term Goals" 
                           value={carePlanInput.longTermGoals} 
-                          onChange={(e)=>setCarePlanInput({...carePlanInput, longTermGoals: e.target.value})} 
+                          onChange={(e)=>setCarePlanInput(prev => ({...prev, longTermGoals: e.target.value}))} 
                           rows="2"
                           placeholder="e.g., Walking independently, Return to work"
                         />
                         <TextArea 
                           label="Exercise / Manual Therapy" 
                           value={carePlanInput.exerciseTherapy} 
-                          onChange={(e)=>setCarePlanInput({...carePlanInput, exerciseTherapy: e.target.value})} 
+                          onChange={(e)=>setCarePlanInput(prev => ({...prev, exerciseTherapy: e.target.value}))} 
                           rows="3"
                           placeholder="Describe exercises, techniques, and therapy details"
                         />
@@ -1403,13 +1639,13 @@ const HospitalManagementApp = () => {
                           <TextInput 
                             label="Duration" 
                             value={carePlanInput.duration} 
-                            onChange={(e)=>setCarePlanInput({...carePlanInput, duration: e.target.value})}
+                            onChange={(e)=>setCarePlanInput(prev => ({...prev, duration: e.target.value}))}
                             placeholder="e.g., 30 minutes"
                           />
                           <TextInput 
                             label="Frequency" 
                             value={carePlanInput.frequency} 
-                            onChange={(e)=>setCarePlanInput({...carePlanInput, frequency: e.target.value})}
+                            onChange={(e)=>setCarePlanInput(prev => ({...prev, frequency: e.target.value}))}
                             placeholder="e.g., 3 times per week"
                           />
                         </div>
@@ -1418,7 +1654,7 @@ const HospitalManagementApp = () => {
                           <TextInput 
                             type="number" 
                             value={carePlanInput.completedCount} 
-                            onChange={(e)=>setCarePlanInput({...carePlanInput, completedCount: e.target.value})}
+                            onChange={(e)=>setCarePlanInput(prev => ({...prev, completedCount: e.target.value}))}
                             placeholder="0"
                           />
                         </div>
@@ -1448,7 +1684,7 @@ const HospitalManagementApp = () => {
   return (
     <div>
       {currentPage === 'home' && <HomePage />}
-      {currentPage === 'appointment' && <AppointmentForm />}
+      {currentPage === 'appointment' && <AppointmentForm formData={formData} setFormData={setFormData} errors={errors} handleSubmit={handleSubmit} showAlert={showAlert} setCurrentPage={setCurrentPage} alertState={alertState} setAlertState={setAlertState} />}
       {currentPage === 'register' && <RegistrationPage />}
       {currentPage === 'login' && <LoginPage />}
       {currentPage === 'doctor-login' && <DoctorLoginPage />}

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DASH Questionnaire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 2px solid #000;
+        }
+
+        .header {
+            background-color: #000;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        .module {
+            border: 2px solid #000;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .module-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .instructions {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: none;
+            border-bottom: 1px solid #000;
+            font-size: 14px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-bottom: 2px solid #000;
+        }
+
+        .question-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 2px solid #000;
+        }
+
+        .question-table th {
+            background-color: #f0f0f0;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #ccc;
+        }
+
+        .question-table td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .question-table td:first-child {
+            width: 50%;
+        }
+
+        .question-table td:not(:first-child) {
+            text-align: center;
+            width: 10%;
+        }
+
+        .radio-label {
+            cursor: pointer;
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        input[type="radio"] + .radio-label {
+            transition: background-color 0.3s;
+        }
+
+        input[type="radio"]:checked + .radio-label {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            display: inline-block;
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .scoring-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-top: 30px;
+            border-left: 4px solid #000;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .scoring-info strong {
+            font-weight: bold;
+        }
+
+        .logo-section {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        .copyright {
+            text-align: right;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        .scoring-info {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">DISABILITIES OF THE ARM, SHOULDER AND HAND</div>
+
+        <!-- Work Module -->
+        <div class="module">
+            <div class="module-title">WORK MODULE (OPTIONAL)</div>
+            <div class="instructions">
+                The following questions ask about the impact of your arm, shoulder or hand problem on your ability to work (including homemaking if that is your main work role).
+            </div>
+            <div>
+                <label>Please indicate what your job/work is:</label>
+                <input type="text" class="input-field" placeholder="Enter your job/work">
+            </div>
+            <label class="checkbox-label">
+                <input type="checkbox" id="noWork">
+                <span>I do not work. (You may skip this section.)</span>
+            </label>
+
+            <div class="instructions" style="margin-top: 20px;">
+                Please circle the number that best describes your physical ability in the past week. Did you have any difficulty:
+            </div>
+
+            <table class="question-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>NO<br>DIFFICULTY</th>
+                        <th>MILD<br>DIFFICULTY</th>
+                        <th>MODERATE<br>DIFFICULTY</th>
+                        <th>SEVERE<br>DIFFICULTY</th>
+                        <th>UNABLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1. using your usual technique for your work?</td>
+                        <td><input type="radio" name="work1" id="work1_1"><label for="work1_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="work1" id="work1_2"><label for="work1_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="work1" id="work1_3"><label for="work1_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="work1" id="work1_4"><label for="work1_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="work1" id="work1_5"><label for="work1_5" class="radio-label">5</label></td>
+                    </tr>
+                    <tr>
+                        <td>2. doing your usual work because of arm, shoulder or hand pain?</td>
+                        <td><input type="radio" name="work2" id="work2_1"><label for="work2_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="work2" id="work2_2"><label for="work2_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="work2" id="work2_3"><label for="work2_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="work2" id="work2_4"><label for="work2_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="work2" id="work2_5"><label for="work2_5" class="radio-label">5</label></td>
+                    </tr>
+                    <tr>
+                        <td>3. doing your work as well as you would like?</td>
+                        <td><input type="radio" name="work3" id="work3_1"><label for="work3_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="work3" id="work3_2"><label for="work3_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="work3" id="work3_3"><label for="work3_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="work3" id="work3_4"><label for="work3_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="work3" id="work3_5"><label for="work3_5" class="radio-label">5</label></td>
+                    </tr>
+                    <tr>
+                        <td>4. spending your usual amount of time doing your work?</td>
+                        <td><input type="radio" name="work4" id="work4_1"><label for="work4_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="work4" id="work4_2"><label for="work4_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="work4" id="work4_3"><label for="work4_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="work4" id="work4_4"><label for="work4_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="work4" id="work4_5"><label for="work4_5" class="radio-label">5</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sports/Performing Arts Module -->
+        <div class="module">
+            <div class="module-title">SPORTS/PERFORMING ARTS MODULE (OPTIONAL)</div>
+            <div class="instructions">
+                The following questions relate to the impact of your arm, shoulder or hand problem on playing <em>your musical instrument or sport or both</em>.<br><br>
+                If you play more than one sport or instrument (or play both), please answer with respect to that activity which is most important to you.
+            </div>
+            <div>
+                <label>Please indicate the sport or instrument which is most important to you:</label>
+                <input type="text" class="input-field" placeholder="Enter sport or instrument">
+            </div>
+            <label class="checkbox-label">
+                <input type="checkbox" id="noSport">
+                <span>I do not play a sport or an instrument. (You may skip this section.)</span>
+            </label>
+
+            <div class="instructions" style="margin-top: 20px;">
+                Please circle the number that best describes your physical ability in the past week. Did you have any difficulty:
+            </div>
+
+            <table class="question-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>NO<br>DIFFICULTY</th>
+                        <th>MILD<br>DIFFICULTY</th>
+                        <th>MODERATE<br>DIFFICULTY</th>
+                        <th>SEVERE<br>DIFFICULTY</th>
+                        <th>UNABLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1. using your usual technique for playing your instrument or sport?</td>
+                        <td><input type="radio" name="sport1" id="sport1_1"><label for="sport1_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="sport1" id="sport1_2"><label for="sport1_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="sport1" id="sport1_3"><label for="sport1_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="sport1" id="sport1_4"><label for="sport1_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="sport1" id="sport1_5"><label for="sport1_5" class="radio-label">5</label></td>
+                    </tr>
+                    <tr>
+                        <td>2. playing your musical instrument or sport because of arm, shoulder or hand pain?</td>
+                        <td><input type="radio" name="sport2" id="sport2_1"><label for="sport2_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="sport2" id="sport2_2"><label for="sport2_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="sport2" id="sport2_3"><label for="sport2_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="sport2" id="sport2_4"><label for="sport2_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="sport2" id="sport2_5"><label for="sport2_5" class="radio-label">5</label></td>
+                    </tr>
+                    <tr>
+                        <td>3. playing your musical instrument or sport as well as you would like?</td>
+                        <td><input type="radio" name="sport3" id="sport3_1"><label for="sport3_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="sport3" id="sport3_2"><label for="sport3_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="sport3" id="sport3_3"><label for="sport3_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="sport3" id="sport3_4"><label for="sport3_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="sport3" id="sport3_5"><label for="sport3_5" class="radio-label">5</label></td>
+                    </tr>
+                    <tr>
+                        <td>4. spending your usual amount of time practising or playing your instrument or sport?</td>
+                        <td><input type="radio" name="sport4" id="sport4_1"><label for="sport4_1" class="radio-label">1</label></td>
+                        <td><input type="radio" name="sport4" id="sport4_2"><label for="sport4_2" class="radio-label">2</label></td>
+                        <td><input type="radio" name="sport4" id="sport4_3"><label for="sport4_3" class="radio-label">3</label></td>
+                        <td><input type="radio" name="sport4" id="sport4_4"><label for="sport4_4" class="radio-label">4</label></td>
+                        <td><input type="radio" name="sport4" id="sport4_5"><label for="sport4_5" class="radio-label">5</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="scoring-info">
+            <strong>SCORING THE OPTIONAL MODULES:</strong> Add up assigned values for each response; divide by 4 (number of items); subtract 1; multiply by 25.<br>
+            <strong>An optional module score may not be calculated if there are any missing items.</strong>
+        </div>
+
+        <div class="copyright">©IWH & AAOS & COMSS 1997</div>
+    </div>
+
+    <!-- Page 2: Daily Activities -->
+    <div class="container" style="margin-top: 30px;">
+        <div class="instructions" style="margin-bottom: 20px;">
+            Please rate your ability to do the following activities in the last week by circling the number below the appropriate response.
+        </div>
+
+        <table class="question-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>NO<br>DIFFICULTY</th>
+                    <th>MILD<br>DIFFICULTY</th>
+                    <th>MODERATE<br>DIFFICULTY</th>
+                    <th>SEVERE<br>DIFFICULTY</th>
+                    <th>UNABLE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1. Open a tight or new jar.</td>
+                    <td><input type="radio" name="daily1" id="daily1_1"><label for="daily1_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily1" id="daily1_2"><label for="daily1_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily1" id="daily1_3"><label for="daily1_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily1" id="daily1_4"><label for="daily1_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily1" id="daily1_5"><label for="daily1_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>2. Write.</td>
+                    <td><input type="radio" name="daily2" id="daily2_1"><label for="daily2_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily2" id="daily2_2"><label for="daily2_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily2" id="daily2_3"><label for="daily2_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily2" id="daily2_4"><label for="daily2_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily2" id="daily2_5"><label for="daily2_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>3. Turn a key.</td>
+                    <td><input type="radio" name="daily3" id="daily3_1"><label for="daily3_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily3" id="daily3_2"><label for="daily3_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily3" id="daily3_3"><label for="daily3_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily3" id="daily3_4"><label for="daily3_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily3" id="daily3_5"><label for="daily3_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>4. Prepare a meal.</td>
+                    <td><input type="radio" name="daily4" id="daily4_1"><label for="daily4_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily4" id="daily4_2"><label for="daily4_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily4" id="daily4_3"><label for="daily4_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily4" id="daily4_4"><label for="daily4_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily4" id="daily4_5"><label for="daily4_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>5. Push open a heavy door.</td>
+                    <td><input type="radio" name="daily5" id="daily5_1"><label for="daily5_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily5" id="daily5_2"><label for="daily5_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily5" id="daily5_3"><label for="daily5_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily5" id="daily5_4"><label for="daily5_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily5" id="daily5_5"><label for="daily5_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>6. Place an object on a shelf above your head.</td>
+                    <td><input type="radio" name="daily6" id="daily6_1"><label for="daily6_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily6" id="daily6_2"><label for="daily6_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily6" id="daily6_3"><label for="daily6_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily6" id="daily6_4"><label for="daily6_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily6" id="daily6_5"><label for="daily6_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>7. Do heavy household chores (e.g., wash walls, wash floors).</td>
+                    <td><input type="radio" name="daily7" id="daily7_1"><label for="daily7_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily7" id="daily7_2"><label for="daily7_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily7" id="daily7_3"><label for="daily7_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily7" id="daily7_4"><label for="daily7_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily7" id="daily7_5"><label for="daily7_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>8. Garden or do yard work.</td>
+                    <td><input type="radio" name="daily8" id="daily8_1"><label for="daily8_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily8" id="daily8_2"><label for="daily8_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily8" id="daily8_3"><label for="daily8_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily8" id="daily8_4"><label for="daily8_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily8" id="daily8_5"><label for="daily8_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>9. Make a bed.</td>
+                    <td><input type="radio" name="daily9" id="daily9_1"><label for="daily9_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily9" id="daily9_2"><label for="daily9_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily9" id="daily9_3"><label for="daily9_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily9" id="daily9_4"><label for="daily9_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily9" id="daily9_5"><label for="daily9_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>10. Carry a shopping bag or briefcase.</td>
+                    <td><input type="radio" name="daily10" id="daily10_1"><label for="daily10_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily10" id="daily10_2"><label for="daily10_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily10" id="daily10_3"><label for="daily10_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily10" id="daily10_4"><label for="daily10_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily10" id="daily10_5"><label for="daily10_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>11. Carry a heavy object (over 10 lbs).</td>
+                    <td><input type="radio" name="daily11" id="daily11_1"><label for="daily11_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily11" id="daily11_2"><label for="daily11_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily11" id="daily11_3"><label for="daily11_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily11" id="daily11_4"><label for="daily11_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily11" id="daily11_5"><label for="daily11_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>12. Change a lightbulb overhead.</td>
+                    <td><input type="radio" name="daily12" id="daily12_1"><label for="daily12_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily12" id="daily12_2"><label for="daily12_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily12" id="daily12_3"><label for="daily12_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily12" id="daily12_4"><label for="daily12_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily12" id="daily12_5"><label for="daily12_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>13. Wash or blow dry your hair.</td>
+                    <td><input type="radio" name="daily13" id="daily13_1"><label for="daily13_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily13" id="daily13_2"><label for="daily13_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily13" id="daily13_3"><label for="daily13_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily13" id="daily13_4"><label for="daily13_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily13" id="daily13_5"><label for="daily13_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>14. Wash your back.</td>
+                    <td><input type="radio" name="daily14" id="daily14_1"><label for="daily14_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily14" id="daily14_2"><label for="daily14_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily14" id="daily14_3"><label for="daily14_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily14" id="daily14_4"><label for="daily14_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily14" id="daily14_5"><label for="daily14_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>15. Put on a pullover sweater.</td>
+                    <td><input type="radio" name="daily15" id="daily15_1"><label for="daily15_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily15" id="daily15_2"><label for="daily15_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily15" id="daily15_3"><label for="daily15_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily15" id="daily15_4"><label for="daily15_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily15" id="daily15_5"><label for="daily15_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>16. Use a knife to cut food.</td>
+                    <td><input type="radio" name="daily16" id="daily16_1"><label for="daily16_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily16" id="daily16_2"><label for="daily16_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily16" id="daily16_3"><label for="daily16_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily16" id="daily16_4"><label for="daily16_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily16" id="daily16_5"><label for="daily16_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>17. Recreational activities which require little effort (e.g., cardplaying, knitting, etc.).</td>
+                    <td><input type="radio" name="daily17" id="daily17_1"><label for="daily17_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily17" id="daily17_2"><label for="daily17_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily17" id="daily17_3"><label for="daily17_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily17" id="daily17_4"><label for="daily17_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily17" id="daily17_5"><label for="daily17_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>18. Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.).</td>
+                    <td><input type="radio" name="daily18" id="daily18_1"><label for="daily18_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily18" id="daily18_2"><label for="daily18_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily18" id="daily18_3"><label for="daily18_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily18" id="daily18_4"><label for="daily18_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily18" id="daily18_5"><label for="daily18_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>19. Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.).</td>
+                    <td><input type="radio" name="daily19" id="daily19_1"><label for="daily19_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily19" id="daily19_2"><label for="daily19_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily19" id="daily19_3"><label for="daily19_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily19" id="daily19_4"><label for="daily19_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily19" id="daily19_5"><label for="daily19_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>20. Manage transportation needs (getting from one place to another).</td>
+                    <td><input type="radio" name="daily20" id="daily20_1"><label for="daily20_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily20" id="daily20_2"><label for="daily20_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily20" id="daily20_3"><label for="daily20_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily20" id="daily20_4"><label for="daily20_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily20" id="daily20_5"><label for="daily20_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>21. Sexual activities.</td>
+                    <td><input type="radio" name="daily21" id="daily21_1"><label for="daily21_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="daily21" id="daily21_2"><label for="daily21_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="daily21" id="daily21_3"><label for="daily21_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="daily21" id="daily21_4"><label for="daily21_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="daily21" id="daily21_5"><label for="daily21_5" class="radio-label">5</label></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page 3: Impact and Symptoms -->
+    <div class="container" style="margin-top: 30px;">
+        <table class="question-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>NOT AT ALL</th>
+                    <th>SLIGHTLY</th>
+                    <th>MODERATELY</th>
+                    <th>QUITE<br>A BIT</th>
+                    <th>EXTREMELY</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>22. During the past week, to <em>what extent</em> has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbours or groups? <em>(circle number)</em></td>
+                    <td><input type="radio" name="impact1" id="impact1_1"><label for="impact1_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="impact1" id="impact1_2"><label for="impact1_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="impact1" id="impact1_3"><label for="impact1_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="impact1" id="impact1_4"><label for="impact1_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="impact1" id="impact1_5"><label for="impact1_5" class="radio-label">5</label></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="question-table" style="margin-top: 30px;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>NOT LIMITED<br>AT ALL</th>
+                    <th>SLIGHTLY<br>LIMITED</th>
+                    <th>MODERATELY<br>LIMITED</th>
+                    <th>VERY<br>LIMITED</th>
+                    <th>UNABLE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>23. During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem? <em>(circle number)</em></td>
+                    <td><input type="radio" name="impact2" id="impact2_1"><label for="impact2_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="impact2" id="impact2_2"><label for="impact2_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="impact2" id="impact2_3"><label for="impact2_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="impact2" id="impact2_4"><label for="impact2_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="impact2" id="impact2_5"><label for="impact2_5" class="radio-label">5</label></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="instructions" style="margin-top: 30px; margin-bottom: 20px;">
+            Please rate the severity of the following symptoms in the last week. <em>(circle number)</em>
+        </div>
+
+        <table class="question-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>NONE</th>
+                    <th>MILD</th>
+                    <th>MODERATE</th>
+                    <th>SEVERE</th>
+                    <th>EXTREME</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>24. Arm, shoulder or hand pain.</td>
+                    <td><input type="radio" name="symptom1" id="symptom1_1"><label for="symptom1_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="symptom1" id="symptom1_2"><label for="symptom1_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="symptom1" id="symptom1_3"><label for="symptom1_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="symptom1" id="symptom1_4"><label for="symptom1_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="symptom1" id="symptom1_5"><label for="symptom1_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>25. Arm, shoulder or hand pain when you performed any specific activity.</td>
+                    <td><input type="radio" name="symptom2" id="symptom2_1"><label for="symptom2_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="symptom2" id="symptom2_2"><label for="symptom2_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="symptom2" id="symptom2_3"><label for="symptom2_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="symptom2" id="symptom2_4"><label for="symptom2_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="symptom2" id="symptom2_5"><label for="symptom2_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>26. Tingling (pins and needles) in your arm, shoulder or hand.</td>
+                    <td><input type="radio" name="symptom3" id="symptom3_1"><label for="symptom3_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="symptom3" id="symptom3_2"><label for="symptom3_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="symptom3" id="symptom3_3"><label for="symptom3_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="symptom3" id="symptom3_4"><label for="symptom3_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="symptom3" id="symptom3_5"><label for="symptom3_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>27. Weakness in your arm, shoulder or hand.</td>
+                    <td><input type="radio" name="symptom4" id="symptom4_1"><label for="symptom4_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="symptom4" id="symptom4_2"><label for="symptom4_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="symptom4" id="symptom4_3"><label for="symptom4_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="symptom4" id="symptom4_4"><label for="symptom4_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="symptom4" id="symptom4_5"><label for="symptom4_5" class="radio-label">5</label></td>
+                </tr>
+                <tr>
+                    <td>28. Stiffness in your arm, shoulder or hand.</td>
+                    <td><input type="radio" name="symptom5" id="symptom5_1"><label for="symptom5_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="symptom5" id="symptom5_2"><label for="symptom5_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="symptom5" id="symptom5_3"><label for="symptom5_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="symptom5" id="symptom5_4"><label for="symptom5_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="symptom5" id="symptom5_5"><label for="symptom5_5" class="radio-label">5</label></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="question-table" style="margin-top: 30px;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>NO<br>DIFFICULTY</th>
+                    <th>MILD<br>DIFFICULTY</th>
+                    <th>MODERATE<br>DIFFICULTY</th>
+                    <th>SEVERE<br>DIFFICULTY</th>
+                    <th>SO MUCH<br>DIFFICULTY<br>THAT I<br>CAN'T SLEEP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>29. During the past week, how much difficulty have you had sleeping because of the pain in your arm, shoulder or hand? <em>(circle number)</em></td>
+                    <td><input type="radio" name="sleep1" id="sleep1_1"><label for="sleep1_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="sleep1" id="sleep1_2"><label for="sleep1_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="sleep1" id="sleep1_3"><label for="sleep1_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="sleep1" id="sleep1_4"><label for="sleep1_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="sleep1" id="sleep1_5"><label for="sleep1_5" class="radio-label">5</label></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="question-table" style="margin-top: 30px;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>STRONGLY<br>DISAGREE</th>
+                    <th>DISAGREE</th>
+                    <th>NEITHER AGREE<br>NOR DISAGREE</th>
+                    <th>AGREE</th>
+                    <th>STRONGLY<br>AGREE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>30. I feel less capable, less confident or less useful because of my arm, shoulder or hand problem. <em>(circle number)</em></td>
+                    <td><input type="radio" name="confidence1" id="confidence1_1"><label for="confidence1_1" class="radio-label">1</label></td>
+                    <td><input type="radio" name="confidence1" id="confidence1_2"><label for="confidence1_2" class="radio-label">2</label></td>
+                    <td><input type="radio" name="confidence1" id="confidence1_3"><label for="confidence1_3" class="radio-label">3</label></td>
+                    <td><input type="radio" name="confidence1" id="confidence1_4"><label for="confidence1_4" class="radio-label">4</label></td>
+                    <td><input type="radio" name="confidence1" id="confidence1_5"><label for="confidence1_5" class="radio-label">5</label></td>
+                </tr>
+            </tbody>
+        </table>
+                    
+</body>
+</html>

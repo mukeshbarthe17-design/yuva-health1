@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPD Assessment Form</title>
+    <style>
+        /* --- General Styles --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Form Container --- */
+        #opd-form {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #111;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        /* --- Fieldset & Legend --- */
+        fieldset {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        legend {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #005a9c;
+            padding: 0 10px;
+            margin-left: 10px;
+        }
+
+        /* --- Utility Grid Classes --- */
+        .grid-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2-col {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3-col {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        /* --- Form Header --- */
+        .form-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header-full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* --- General Input Styling --- */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Important for width: 100% */
+            font-size: 1rem;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* --- Checkbox & Radio Groups --- */
+        .check-group,
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        /* Align label to the right of the checkbox */
+        .check-group label,
+        .radio-group label {
+            font-weight: normal;
+            margin-bottom: 0;
+            order: 2; /* Label comes after the input */
+        }
+
+        /* *** MODIFIED *** Corrected selector to only target checkboxes/radios */
+        .check-group input[type="checkbox"],
+        .check-group input[type="radio"],
+        .radio-group input[type="radio"] {
+            order: 1; /* Input comes before the label */
+            margin: 0;
+        }
+
+        .input-with-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-with-label input[type="text"] {
+            flex-grow: 1;
+        }
+
+        .check-group-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- Specific Section Styling --- */
+
+        /* Pain Assessment */
+        .pain-assessment {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .pain-diagram {
+            text-align: center;
+        }
+
+        #pain-canvas {
+            border: 1px solid #b0b0b0;
+            border-radius: 4px;
+            background-color: #fafafa;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .pain-inputs {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .vas-scale {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+        .vas-scale label {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            cursor: pointer;
+        }
+        .vas-scale input[type="radio"] {
+            display: none; /* Hide the actual radio button */
+        }
+        /* Style for checked VAS number */
+        .vas-scale input[type="radio"]:checked + label {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pain-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* *** MODIFIED *** Specific re-ordering for Electro Therapy section */
+        .procedures-electro .check-group label {
+            order: 1;
+            white-space: nowrap; /* Prevent label from wrapping */
+        }
+        .procedures-electro .check-group input[type="checkbox"] {
+            order: 2;
+        }
+        .procedures-electro .check-group input[type="text"] {
+            order: 3;
+        }
+
+        /* Form Footer - Removed */
+
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button[type="button"] {
+            background-color: #f44336;
+            color: white;
+            margin-right: 10px;
+        }
+
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .form-header,
+            .pain-assessment {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2-col,
+            .grid-3-col {
+                grid-template-columns: 1fr;
+            }
+
+            /* Signature fields removed, so no footer rules needed */
+        }
+    </style>
+</head>
+<body>
+
+    <form id="opd-form">
+        <h1>OPD ASSESSMENT FORM</h1>
+
+        <div class="form-header">
+            <div class="form-group">
+                <label for="reg-no">Reg. No.:</label>
+                <input type="text" id="reg-no" name="reg-no">
+            </div>
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date">
+            </div>
+            <div class="form-group">
+                <label for="sex">Sex:</label>
+                <input type="text" id="sex" name="sex">
+            </div>
+            <div class="form-group">
+                <label for="patient-name">Patient Name: Mr/Ms.</label>
+                <input type="text" id="patient-name" name="patient-name">
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age">
+            </div>
+            <div class="form-group">
+                <label for="dob">D.O.B.:</label>
+                <input type="date" id="dob" name="dob">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="occupation">Occupation:</label>
+                <input type="text" id="occupation" name="occupation">
+            </div>
+            <div class="form-group">
+                <label for="contact-no">Contact No.:</label>
+                <input type="tel" id="contact-no" name="contact-no">
+            </div>
+            <div class="form-group header-full-width">
+                <label for="referring">Referring / Primary consultant / Self:</label>
+                <input type="text" id="referring" name="referring">
+            </div>
+            <div class="form-group header-full-width">
+                <label for="chief-complaint">Chief Complaint / Need:</label>
+                <input type="text" id="chief-complaint" name="chief-complaint">
+            </div>
+        </div>
+
+        <fieldset>
+            <legend>HOPL</legend>
+            <div class="form-group">
+                <textarea id="hopl" name="hopl"></textarea>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>PMH</legend>
+            <div class="grid-container grid-2-col">
+                <div class="check-group-column">
+                    <strong>Medical H/O:</strong>
+                    <div class="check-group">
+                        <input type="checkbox" id="hypertension" name="hypertension">
+                        <label for="hypertension">Hypertension</label>
+                    </div>
+                    <div class="check-group">
+                        <input type="checkbox" id="diabetes" name="diabetes">
+                        <label for="diabetes">Diabetes Mellitus</label>
+                    </div>
+                    <div class="check-group">
+                        <input type="checkbox" id="asthma" name="asthma">
+                        <label for="asthma">Bronchial Asthma</label>
+                    </div>
+                    <div class="input-with-label">
+                        <label for="medical-other">Other:</label>
+                        <input type="text" id="medical-other" name="medical-other">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <strong>Surgical H/O:</strong>
+                    <div class="input-with-label">
+                        <label for="fracture">Fracture:</label>
+                        <input type="text" id="fracture" name="fracture">
+                    </div>
+                    <div class="input-with-label">
+                        <label for="replacement">Replacement:</label>
+                        <input type="text" id="replacement" name="replacement">
+                    </div>
+                    <div class="input-with-label">
+                        <label for="repairs">Repairs:</label>
+                        <input type="text" id="repairs" name="repairs">
+                    </div>
+                    <div class="input-with-label">
+                        <label for="spinal">Spinal:</label>
+                        <input type="text" id="spinal" name="spinal">
+                    </div>
+                    <div class="input-with-label">
+                        <label for="craniotomy">Craniotomy:</label>
+                        <input type="text" id="craniotomy" name="craniotomy">
+                    </div>
+                    <div class="input-with-label">
+                        <label for="surgical-other">Other:</label>
+                        <input type="text" id="surgical-other" name="surgical-other">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Pain Assessment</legend>
+            <div class="pain-assessment">
+                <div class="pain-diagram">
+                    <canvas id="pain-canvas" width="400" height="400"></canvas>
+                    <button type="button" id="clear-canvas">Clear Diagram</button>
+                </div>
+                <div class="pain-inputs">
+                    <div class="form-group">
+                        <strong>VAS (0-10):</strong>
+                        <div class="vas-scale">
+                            <input type="radio" id="vas-0" name="vas" value="0"><label for="vas-0">0</label>
+                            <input type="radio" id="vas-1" name="vas" value="1"><label for="vas-1">1</label>
+                            <input type="radio" id="vas-2" name="vas" value="2"><label for="vas-2">2</label>
+                            <input type="radio" id="vas-3" name="vas" value="3"><label for="vas-3">3</label>
+                            <input type="radio" id="vas-4" name="vas" value="4"><label for="vas-4">4</label>
+                            <input type="radio" id="vas-5" name="vas" value="5"><label for="vas-5">5</label>
+                            <input type="radio" id="vas-6" name="vas" value="6"><label for="vas-6">6</label>
+                            <input type="radio" id="vas-7" name="vas" value="7"><label for="vas-7">7</label>
+                            <input type="radio" id="vas-8" name="vas" value="8"><label for="vas-8">8</label>
+                            <input type="radio" id="vas-9" name="vas" value="9"><label for="vas-9">9</label>
+                            <input type="radio" id="vas-10" name="vas" value="10"><label for="vas-10">10</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <strong>Onset:</strong>
+                        <div class="pain-options">
+                            <div class="radio-group"><input type="radio" id="onset-sudden" name="onset" value="sudden"><label for="onset-sudden">Sudden</label></div>
+                            <div class="radio-group"><input type="radio" id="onset-gradual" name="onset" value="gradual"><label for="onset-gradual">Gradual</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <strong>Duration:</strong>
+                        <div class="pain-options">
+                            <div class="radio-group"><input type="radio" id="duration-acute" name="duration" value="acute"><label for="duration-acute">Acute</label></div>
+                            <div class="radio-group"><input type="radio" id="duration-chronic" name="duration" value="chronic"><label for="duration-chronic">Chronic</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pain-nature"><strong>Nature:</strong></label>
+                        <input type="text" id="pain-nature" name="pain-nature">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Clinical Findings</legend>
+            <div class="form-group">
+                <label for="on-obv">On Obv./VS:</label>
+                <input type="text" id="on-obv" name="on-obv">
+            </div>
+            <div class="form-group">
+                <label for="on-palpation">On Palpation:</label>
+                <input type="text" id="on-palpation" name="on-palpation">
+            </div>
+            <div class="form-group">
+                <label for="tests">Tests:</label>
+                <input type="text" id="tests" name="tests">
+            </div>
+            <div class="form-group">
+                <label for="measures">Measures/Investigations:</label>
+                <input type="text" id="measures" name="measures">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Provisional Diagnosis / Diagnosis</legend>
+            <div class="form-group">
+                <textarea id="diagnosis" name="diagnosis"></textarea>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Goals</legend>
+            <div class="grid-container grid-3-col">
+                <div class="check-group-column">
+                    <div class="check-group"><input type="checkbox" id="goal-circulation" name="goal-circulation"><label for="goal-circulation">Improve circulation</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-rom" name="goal-rom"><label for="goal-rom">Improve range of motion</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-strength" name="goal-strength"><label for="goal-strength">Improve Strength</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-flexibility" name="goal-flexibility"><label for="goal-flexibility">Improve Flexibility</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-endurance" name="goal-endurance"><label for="goal-endurance">Improve Endurance</label></div>
+                </div>
+                <div class="check-group-column">
+                    <div class="check-group"><input type="checkbox" id="goal-reduce-pain" name="goal-reduce-pain"><label for="goal-reduce-pain">Reduce Pain</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-reduce-inflammation" name="goal-reduce-inflammation"><label for="goal-reduce-inflammation">Reduce inflammation</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-posture" name="goal-posture"><label for="goal-posture">Posture Training</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-balance" name="goal-balance"><label for="goal-balance">Balance/co-ordination</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-gait" name="goal-gait"><label for="goal-gait">Gait Training</label></div>
+                </div>
+                <div class="check-group-column">
+                    <div class="check-group"><input type="checkbox" id="goal-spasticity" name="goal-spasticity"><label for="goal-spasticity">Reduce Spasticity/flaccidity</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-contractures" name="goal-contractures"><label for="goal-contractures">Reduce contractures General</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-conditioning" name="goal-conditioning"><label for="goal-conditioning">Conditioning/Fitness</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-rehab" name="goal-rehab"><label for="goal-rehab">Comprehensive Rehab</label></div>
+                    <div class="check-group"><input type="checkbox" id="goal-cardio" name="goal-cardio"><label for="goal-cardio">Cardio pulmonary Rehab</label></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Procedures</legend>
+            <div class="grid-container grid-2-col">
+                
+                <div class="procedures-electro">
+                    <strong>Electro therapy (specify dose/Duration)</strong>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-shortwave" name="proc-shortwave">
+                        <label for="proc-shortwave">Shortwave Diathermy:</label>
+                        <input type="text" id="proc-shortwave-dose" name="proc-shortwave-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-ultrasonic" name="proc-ultrasonic">
+                        <label for="proc-ultrasonic">Ultrasonic Therapy:</label>
+                        <input type="text" id="proc-ultrasonic-dose" name="proc-ultrasonic-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-interferential" name="proc-interferential">
+                        <label for="proc-interferential">Interferential Therapy:</label>
+                        <input type="text" id="proc-interferential-dose" name="proc-interferential-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-tens" name="proc-tens">
+                        <label for="proc-tens">Tens:</label>
+                        <input type="text" id="proc-tens-dose" name="proc-tens-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-stimulation" name="proc-stimulation">
+                        <label for="proc-stimulation">Stimulation:</label>
+                        <input type="text" id="proc-stimulation-dose" name_role="proc-stimulation-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-cpm" name="proc-cpm">
+                        <label for="proc-cpm">CPM:</label>
+                        <input type="text" id="proc-cpm-dose" name="proc-cpm-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-traction" name="proc-traction">
+                        <label for="proc-traction">Traction:</label>
+                        <input type="text" id="proc-traction-dose" name="proc-traction-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <input type="checkbox" id="proc-biofeedback" name="proc-biofeedback">
+                        <label for="proc-biofeedback">Biofeedback:</label>
+                        <input type="text" id="proc-biofeedback-dose" name="proc-biofeedback-dose">
+                    </div>
+                    <div class="input-with-label check-group">
+                        <label for="proc-electro-other">Others:</label>
+                        <input type="checkbox" id="proc-electro-other" name="proc-electro-other">
+                        <input type="text" id="proc-electro-other-dose" name="proc-electro-other-dose">
+                    </div>
+                </div>
+                <div class="check-group-column">
+                    <strong>Exercise Therapy</strong>
+                    <div class="check-group"><input type="checkbox" id="ex-cervical" name="ex-cervical"><label for="ex-cervical">Cervical exercises</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-shoulder" name="ex-shoulder"><label for="ex-shoulder">Shoulder / Elbow / Wrist / Hand</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-pelvis" name="ex-pelvis"><label for="ex-pelvis">Pelvis/ Hip/ Knee / Ankle</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-spinal" name="ex-spinal"><label for="ex-spinal">Spinal / Chest</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-mobilization" name="ex-mobilization"><label for="ex-mobilization">Mobilization/Soft tissue Mainpulation</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-stretching" name="ex-stretching"><label for="ex-stretching">Stretching</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-prom" name="ex-prom"><label for="ex-prom">PROM/AAROM/AROM/RROM</label></div>
+                    <div class="check-group"><input type="checkbox" id="ex-balance" name="ex-balance"><label for="ex-balance">Balance/ Gait / co-ordination</label></div>
+                    <div class="check-group">
+                        <input type="checkbox" id="ex-other" name="ex-other">
+                        <label for="ex-other">Others:</label>
+                        <input type="text" id="ex-other-text" name="ex-other-text" style="flex-grow: 1;">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Advice</legend>
+            <div class="grid-container grid-2-col">
+                <div class="check-group-column">
+                    <strong>Prevention:</strong>
+                    <div class="check-group"><input type="checkbox" id="advice-lifting" name="advice-lifting"><label for="advice-lifting">Avoid Lifting/ Forward Bending/Squatting</label></div>
+                    <div class="check-group"><input type="checkbox" id="advice-sleeping" name="advice-sleeping"><label for="advice-sleeping">Sleeping prone or on stomach</label></div>
+                    <div class="check-group"><input type="checkbox" id="advice-prolonged" name="advice-prolonged"><label for="advice-prolonged">Avoid Prolonged Standing/Walking /Static Postures</label></div>
+                    <div class="check-group"><input type="checkbox" id="advice-overhead" name="advice-overhead"><label for="advice-overhead">Avoid Overhead Activities</label></div>
+                </div>
+                <div class="check-group-column">
+                    <br> <div class="check-group"><input type="checkbox" id="advice-cross-legged" name="advice-cross-legged"><label for="advice-cross-legged">Avoid Cross Legged Sitting/ Kneeling/ Kneel Sitting/ wearing high heel.</label></div>
+                    <div class="check-group"><input type="checkbox" id="advice-posture" name="advice-posture"><label for="advice-posture">Posture and Ergonomics as Advised.</label></div>
+                    <div class="check-group">
+                        <input type="checkbox" id="advice-prosthesis" name="advice-prosthesis">
+                        <label for="advice-prosthesis">Prosthesis / Orthosis:</label>
+                        <input type="text" id="advice-prosthesis-text" name="advice-prosthesis-text" style="flex-grow: 1;">
+                    </div>
+                    <div class="check-group"><input type="checkbox" id="advice-hep" name="advice-hep"><label for="advice-hep">HEP</label></div>
+                    <div class="check-group">
+                        <input type="checkbox" id="advice-other" name="advice-other">
+                        <label for="advice-other">Others:</label>
+                        <input type="text" id="advice-other-text" name="advice-other-text" style="flex-grow: 1;">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Remarks</legend>
+            <div class="form-group">
+                <textarea id="remarks" name="remarks"></textarea>
+            </div>
+        </fieldset>
+
+        <div class="form-group">
+            <label for="follow-up"><strong>Follow up Date:</strong></label>
+            <input type="date" id="follow-up" name="follow-up" style="max-width: 200px;">
+        </div>
+
+        <p>Consent: Treatment plan Benefits, choice of treatment, alternatives and risks has been explained in the language comprehended by the client.</p>
+
+        <div class="form-actions">
+            <button type="submit">Submit Form</button>
+        </div>
+
+    </form>
+
+    <script>
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('pain-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions (can be higher for better resolution)
+            canvas.width = 400;
+            canvas.height = 400;
+
+            // Load the body chart image
+            const bodyImage = new Image();
+            
+            // This loads the image from your local folder.
+            // Make sure you have a file named "body-chart.jpg" in the same
+            // directory as this HTML file.
+            bodyImage.src = 'body-chart.jpg'; 
+            
+            // Function to draw the image on the canvas
+            function drawBaseImage() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                ctx.drawImage(bodyImage, 0, 0, canvas.width, canvas.height); // Draw image
+            }
+
+            // Draw the image once it's loaded
+            bodyImage.onload = () => {
+                drawBaseImage();
+            };
+            
+            // Handle potential image loading errors
+            bodyImage.onerror = () => {
+                console.error("Error loading 'body-chart.jpg'.");
+                ctx.fillStyle = 'red';
+                ctx.font = '14px Arial';
+                ctx.fillText("Error: 'body-chart.jpg' not found.", 10, 20);
+                ctx.fillText("Please make sure it's in the same folder", 10, 40);
+                ctx.fillText("as this HTML file.", 10, 60);
+            };
+
+            // Function to draw a mark on click
+            function drawMark(e) {
+                // Get the coordinates of the click relative to the canvas
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Draw a red circle
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI); // 5px radius circle
+                ctx.fill();
+            }
+
+            // Add click event listener to the canvas
+            canvas.addEventListener('click', drawMark);
+
+            // Add click event to the "Clear Diagram" button
+            document.getElementById('clear-canvas').addEventListener('click', () => {
+                drawBaseImage(); // Redraw the base image to clear marks
+            });
+
+            // Prevent form submission for this demo
+            document.getElementById('opd-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Form submission is disabled for this demo.');
+                // In a real application, you would serialize the form data
+                // and send it to a server here.
+            });
+        });
+    </script>
+
+</body>
+</html>

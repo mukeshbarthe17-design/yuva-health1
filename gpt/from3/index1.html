@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muscle Examination & Range of Motion Record</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #opd-form {
+            max-width: 1200px; /* Wider to accommodate columns */
+            margin: 20px auto;
+            padding: 25px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #111;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            color: #005a9c;
+            border-bottom: 2px solid #005a9c;
+            padding-bottom: 5px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Table-like layout for examinations */
+        .examination-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .examination-table th,
+        .examination-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .examination-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .examination-table .category-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+            text-align: left;
+            font-size: 1rem;
+        }
+        
+        .examination-table .sub-category {
+            padding-left: 25px;
+        }
+
+        .examination-table input[type="text"] {
+            border: none;
+            padding: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 24px; /* Ensure input fields are visible */
+        }
+        
+        /* Specific styling for the muscle examination columns */
+        .muscle-grades th:nth-child(1),
+        .muscle-grades th:nth-child(2),
+        .muscle-grades th:nth-child(3),
+        .muscle-grades td:nth-child(1),
+        .muscle-grades td:nth-child(2),
+        .muscle-grades td:nth-child(3) {
+            width: 50px; /* Narrower columns for left grades */
+            text-align: center;
+        }
+
+        .muscle-grades th:nth-child(4),
+        .muscle-grades td:nth-child(4) {
+            width: 200px; /* Center column for muscle name */
+            text-align: center;
+        }
+
+        .muscle-grades th:nth-child(5),
+        .muscle-grades th:nth-child(6),
+        .muscle-grades th:nth-child(7),
+        .muscle-grades td:nth-child(5),
+        .muscle-grades td:nth-child(6),
+        .muscle-grades td:nth-child(7) {
+            width: 50px; /* Narrower columns for right grades */
+            text-align: center;
+        }
+
+        .muscle-grades .muscle-name {
+            width: 200px; /* Adjust width for muscle name */
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Specific styling for ROM table */
+        .rom-table th:nth-child(1),
+        .rom-table td:nth-child(1) {
+            width: 100px;
+            text-align: center;
+        }
+        
+        .rom-table th:nth-child(2),
+        .rom-table td:nth-child(2) {
+            width: 200px;
+            text-align: center;
+        }
+        
+        .rom-table th:nth-child(3),
+        .rom-table td:nth-child(3) {
+            width: 100px;
+            text-align: center;
+        }
+        
+        .rom-table .motion-name {
+            font-weight: 500;
+        }
+        .rom-table .comments-row td {
+            padding: 0;
+        }
+
+
+        /* General form header */
+        .form-header-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .form-header-grid {
+                grid-template-columns: 1fr;
+            }
+            .examination-table {
+                font-size: 0.8rem;
+            }
+            .examination-table th,
+            .examination-table td {
+                padding: 4px;
+            }
+            .examination-table input[type="text"] {
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <form id="opd-form">
+        <h1>PHYSICAL REHABILITATION ASSESSMENT</h1>
+
+        <div class="form-header-grid">
+            <div class="form-group">
+                <label for="patient-name">Patient Name:</label>
+                <input type="text" id="patient-name" name="patient-name">
+            </div>
+            <div class="form-group">
+                <label for="date-of-exam">Date of Examination:</label>
+                <input type="date" id="date-of-exam" name="date-of-exam">
+            </div>
+            <div class="form-group">
+                <label for="examiner-name">Examiner Name:</label>
+                <input type="text" id="examiner-name" name="examiner-name">
+            </div>
+        </div>
+
+        <h2>I. Documentation of Muscle Examination</h2>
+
+        <div class="muscle-examination-section">
+            <table class="examination-table muscle-grades">
+                <thead>
+                    <tr>
+                        <th colspan="3">Left</th>
+                        <th>Muscle</th>
+                        <th colspan="3">Right</th>
+                    </tr>
+                    <tr>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th></th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="7" class="category-header">NECK</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-cap-ext-l1"></td>
+                        <td><input type="text" name="neck-cap-ext-l2"></td>
+                        <td><input type="text" name="neck-cap-ext-l3"></td>
+                        <td class="muscle-name">Capital extension</td>
+                        <td><input type="text" name="neck-cap-ext-r1"></td>
+                        <td><input type="text" name="neck-cap-ext-r2"></td>
+                        <td><input type="text" name="neck-cap-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-cerv-ext-l1"></td>
+                        <td><input type="text" name="neck-cerv-ext-l2"></td>
+                        <td><input type="text" name="neck-cerv-ext-l3"></td>
+                        <td class="muscle-name">Cervical extension</td>
+                        <td><input type="text" name="neck-cerv-ext-r1"></td>
+                        <td><input type="text" name="neck-cerv-ext-r2"></td>
+                        <td><input type="text" name="neck-cerv-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-comb-ext-l1"></td>
+                        <td><input type="text" name="neck-comb-ext-l2"></td>
+                        <td><input type="text" name="neck-comb-ext-l3"></td>
+                        <td class="muscle-name sub-category">Combined extension (capital plus cervical)</td>
+                        <td><input type="text" name="neck-comb-ext-r1"></td>
+                        <td><input type="text" name="neck-comb-ext-r2"></td>
+                        <td><input type="text" name="neck-comb-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-cap-flex-l1"></td>
+                        <td><input type="text" name="neck-cap-flex-l2"></td>
+                        <td><input type="text" name="neck-cap-flex-l3"></td>
+                        <td class="muscle-name">Capital flexion</td>
+                        <td><input type="text" name="neck-cap-flex-r1"></td>
+                        <td><input type="text" name="neck-cap-flex-r2"></td>
+                        <td><input type="text" name="neck-cap-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-cerv-flex-l1"></td>
+                        <td><input type="text" name="neck-cerv-flex-l2"></td>
+                        <td><input type="text" name="neck-cerv-flex-l3"></td>
+                        <td class="muscle-name">Cervical flexion</td>
+                        <td><input type="text" name="neck-cerv-flex-r1"></td>
+                        <td><input type="text" name="neck-cerv-flex-r2"></td>
+                        <td><input type="text" name="neck-cerv-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-comb-flex-l1"></td>
+                        <td><input type="text" name="neck-comb-flex-l2"></td>
+                        <td><input type="text" name="neck-comb-flex-l3"></td>
+                        <td class="muscle-name sub-category">Combined flexion (capital plus cervical)</td>
+                        <td><input type="text" name="neck-comb-flex-r1"></td>
+                        <td><input type="text" name="neck-comb-flex-r2"></td>
+                        <td><input type="text" name="neck-comb-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-scm-l1"></td>
+                        <td><input type="text" name="neck-scm-l2"></td>
+                        <td><input type="text" name="neck-scm-l3"></td>
+                        <td class="muscle-name">Combined flexion and rotation (sternocleidomastoid)</td>
+                        <td><input type="text" name="neck-scm-r1"></td>
+                        <td><input type="text" name="neck-scm-r2"></td>
+                        <td><input type="text" name="neck-scm-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="neck-cerv-rot-l1"></td>
+                        <td><input type="text" name="neck-cerv-rot-l2"></td>
+                        <td><input type="text" name="neck-cerv-rot-l3"></td>
+                        <td class="muscle-name">Cervical rotation</td>
+                        <td><input type="text" name="neck-cerv-rot-r1"></td>
+                        <td><input type="text" name="neck-cerv-rot-r2"></td>
+                        <td><input type="text" name="neck-cerv-rot-r3"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="7" class="category-header">TRUNK</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="trunk-flex-lumbar-l1"></td>
+                        <td><input type="text" name="trunk-flex-lumbar-l2"></td>
+                        <td><input type="text" name="trunk-flex-lumbar-l3"></td>
+                        <td class="muscle-name">Flexion—Lumbar</td>
+                        <td><input type="text" name="trunk-flex-lumbar-r1"></td>
+                        <td><input type="text" name="trunk-flex-lumbar-r2"></td>
+                        <td><input type="text" name="trunk-flex-lumbar-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="trunk-ext-thoracic-l1"></td>
+                        <td><input type="text" name="trunk-ext-thoracic-l2"></td>
+                        <td><input type="text" name="trunk-ext-thoracic-l3"></td>
+                        <td class="muscle-name">Extension—Thoracic</td>
+                        <td><input type="text" name="trunk-ext-thoracic-r1"></td>
+                        <td><input type="text" name="trunk-ext-thoracic-r2"></td>
+                        <td><input type="text" name="trunk-ext-thoracic-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="trunk-ext-lumbar-l1"></td>
+                        <td><input type="text" name="trunk-ext-lumbar-l2"></td>
+                        <td><input type="text" name="trunk-ext-lumbar-l3"></td>
+                        <td class="muscle-name">Extension—Lumbar</td>
+                        <td><input type="text" name="trunk-ext-lumbar-r1"></td>
+                        <td><input type="text" name="trunk-ext-lumbar-r2"></td>
+                        <td><input type="text" name="trunk-ext-lumbar-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="trunk-rot-l1"></td>
+                        <td><input type="text" name="trunk-rot-l2"></td>
+                        <td><input type="text" name="trunk-rot-l3"></td>
+                        <td class="muscle-name">Rotation</td>
+                        <td><input type="text" name="trunk-rot-r1"></td>
+                        <td><input type="text" name="trunk-rot-r2"></td>
+                        <td><input type="text" name="trunk-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><input type="text" name="trunk-diaphragm-l"></td>
+                        <td class="muscle-name">Diaphragm strength</td>
+                        <td colspan="3"><input type="text" name="trunk-diaphragm-r"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><input type="text" name="trunk-inspiration-l"></td>
+                        <td class="muscle-name">Maximal inspiration less full expiration (indirect intercostal test) (inches)</td>
+                        <td colspan="3"><input type="text" name="trunk-inspiration-r"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><input type="text" name="trunk-chest-exp-l"></td>
+                        <td class="muscle-name">Chest expansion (forced expiration) (Pr, WF, NF, O)</td>
+                        <td colspan="3"><input type="text" name="trunk-chest-exp-r"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="7" class="category-header">UPPER EXTREMITY</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-scap-dep-up-rot-l1"></td>
+                        <td><input type="text" name="ue-scap-dep-up-rot-l2"></td>
+                        <td><input type="text" name="ue-scap-dep-up-rot-l3"></td>
+                        <td class="muscle-name">Scapular depression and upward rotation</td>
+                        <td><input type="text" name="ue-scap-dep-up-rot-r1"></td>
+                        <td><input type="text" name="ue-scap-dep-up-rot-r2"></td>
+                        <td><input type="text" name="ue-scap-dep-up-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-scap-elev-l1"></td>
+                        <td><input type="text" name="ue-scap-elev-l2"></td>
+                        <td><input type="text" name="ue-scap-elev-l3"></td>
+                        <td class="muscle-name">Scapular elevation</td>
+                        <td><input type="text" name="ue-scap-elev-r1"></td>
+                        <td><input type="text" name="ue-scap-elev-r2"></td>
+                        <td><input type="text" name="ue-scap-elev-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-scap-add-l1"></td>
+                        <td><input type="text" name="ue-scap-add-l2"></td>
+                        <td><input type="text" name="ue-scap-add-l3"></td>
+                        <td class="muscle-name">Scapular adduction</td>
+                        <td><input type="text" name="ue-scap-add-r1"></td>
+                        <td><input type="text" name="ue-scap-add-r2"></td>
+                        <td><input type="text" name="ue-scap-add-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-scap-add-down-rot-l1"></td>
+                        <td><input type="text" name="ue-scap-add-down-rot-l2"></td>
+                        <td><input type="text" name="ue-scap-add-down-rot-l3"></td>
+                        <td class="muscle-name">Scapular adduction and down-ward rotation</td>
+                        <td><input type="text" name="ue-scap-add-down-rot-r1"></td>
+                        <td><input type="text" name="ue-scap-add-down-rot-r2"></td>
+                        <td><input type="text" name="ue-scap-add-down-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-flex-l1"></td>
+                        <td><input type="text" name="ue-shoulder-flex-l2"></td>
+                        <td><input type="text" name="ue-shoulder-flex-l3"></td>
+                        <td class="muscle-name">Shoulder flexion</td>
+                        <td><input type="text" name="ue-shoulder-flex-r1"></td>
+                        <td><input type="text" name="ue-shoulder-flex-r2"></td>
+                        <td><input type="text" name="ue-shoulder-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-ext-l1"></td>
+                        <td><input type="text" name="ue-shoulder-ext-l2"></td>
+                        <td><input type="text" name="ue-shoulder-ext-l3"></td>
+                        <td class="muscle-name">Shoulder extension</td>
+                        <td><input type="text" name="ue-shoulder-ext-r1"></td>
+                        <td><input type="text" name="ue-shoulder-ext-r2"></td>
+                        <td><input type="text" name="ue-shoulder-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-abd-l1"></td>
+                        <td><input type="text" name="ue-shoulder-abd-l2"></td>
+                        <td><input type="text" name="ue-shoulder-abd-l3"></td>
+                        <td class="muscle-name">Shoulder abduction</td>
+                        <td><input type="text" name="ue-shoulder-abd-r1"></td>
+                        <td><input type="text" name="ue-shoulder-abd-r2"></td>
+                        <td><input type="text" name="ue-shoulder-abd-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-horiz-abd-l1"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-abd-l2"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-abd-l3"></td>
+                        <td class="muscle-name">Shoulder horizontal abduction</td>
+                        <td><input type="text" name="ue-shoulder-horiz-abd-r1"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-abd-r2"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-abd-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-horiz-add-l1"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-add-l2"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-add-l3"></td>
+                        <td class="muscle-name">Shoulder horizontal adduction</td>
+                        <td><input type="text" name="ue-shoulder-horiz-add-r1"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-add-r2"></td>
+                        <td><input type="text" name="ue-shoulder-horiz-add-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-ext-rot-l1"></td>
+                        <td><input type="text" name="ue-shoulder-ext-rot-l2"></td>
+                        <td><input type="text" name="ue-shoulder-ext-rot-l3"></td>
+                        <td class="muscle-name">Shoulder external rotation</td>
+                        <td><input type="text" name="ue-shoulder-ext-rot-r1"></td>
+                        <td><input type="text" name="ue-shoulder-ext-rot-r2"></td>
+                        <td><input type="text" name="ue-shoulder-ext-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-shoulder-int-rot-l1"></td>
+                        <td><input type="text" name="ue-shoulder-int-rot-l2"></td>
+                        <td><input type="text" name="ue-shoulder-int-rot-l3"></td>
+                        <td class="muscle-name">Shoulder internal rotation</td>
+                        <td><input type="text" name="ue-shoulder-int-rot-r1"></td>
+                        <td><input type="text" name="ue-shoulder-int-rot-r2"></td>
+                        <td><input type="text" name="ue-shoulder-int-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-elbow-flex-l1"></td>
+                        <td><input type="text" name="ue-elbow-flex-l2"></td>
+                        <td><input type="text" name="ue-elbow-flex-l3"></td>
+                        <td class="muscle-name">Elbow flexion</td>
+                        <td><input type="text" name="ue-elbow-flex-r1"></td>
+                        <td><input type="text" name="ue-elbow-flex-r2"></td>
+                        <td><input type="text" name="ue-elbow-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-elbow-ext-l1"></td>
+                        <td><input type="text" name="ue-elbow-ext-l2"></td>
+                        <td><input type="text" name="ue-elbow-ext-l3"></td>
+                        <td class="muscle-name">Elbow extension</td>
+                        <td><input type="text" name="ue-elbow-ext-r1"></td>
+                        <td><input type="text" name="ue-elbow-ext-r2"></td>
+                        <td><input type="text" name="ue-elbow-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-forearm-sup-l1"></td>
+                        <td><input type="text" name="ue-forearm-sup-l2"></td>
+                        <td><input type="text" name="ue-forearm-sup-l3"></td>
+                        <td class="muscle-name">Forearm supination</td>
+                        <td><input type="text" name="ue-forearm-sup-r1"></td>
+                        <td><input type="text" name="ue-forearm-sup-r2"></td>
+                        <td><input type="text" name="ue-forearm-sup-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-forearm-pro-l1"></td>
+                        <td><input type="text" name="ue-forearm-pro-l2"></td>
+                        <td><input type="text" name="ue-forearm-pro-l3"></td>
+                        <td class="muscle-name">Forearm pronation</td>
+                        <td><input type="text" name="ue-forearm-pro-r1"></td>
+                        <td><input type="text" name="ue-forearm-pro-r2"></td>
+                        <td><input type="text" name="ue-forearm-pro-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-wrist-flex-l1"></td>
+                        <td><input type="text" name="ue-wrist-flex-l2"></td>
+                        <td><input type="text" name="ue-wrist-flex-l3"></td>
+                        <td class="muscle-name">Wrist flexion</td>
+                        <td><input type="text" name="ue-wrist-flex-r1"></td>
+                        <td><input type="text" name="ue-wrist-flex-r2"></td>
+                        <td><input type="text" name="ue-wrist-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-wrist-ext-l1"></td>
+                        <td><input type="text" name="ue-wrist-ext-l2"></td>
+                        <td><input type="text" name="ue-wrist-ext-l3"></td>
+                        <td class="muscle-name">Wrist extension</td>
+                        <td><input type="text" name="ue-wrist-ext-r1"></td>
+                        <td><input type="text" name="ue-wrist-ext-r2"></td>
+                        <td><input type="text" name="ue-wrist-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-finger-mcp-flex-l1"></td>
+                        <td><input type="text" name="ue-finger-mcp-flex-l2"></td>
+                        <td><input type="text" name="ue-finger-mcp-flex-l3"></td>
+                        <td class="muscle-name">Finger metacarpophalangeal flexion</td>
+                        <td><input type="text" name="ue-finger-mcp-flex-r1"></td>
+                        <td><input type="text" name="ue-finger-mcp-flex-r2"></td>
+                        <td><input type="text" name="ue-finger-mcp-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-finger-pip-flex-l1"></td>
+                        <td><input type="text" name="ue-finger-pip-flex-l2"></td>
+                        <td><input type="text" name="ue-finger-pip-flex-l3"></td>
+                        <td class="muscle-name">Finger proximal interphalangeal flexion</td>
+                        <td><input type="text" name="ue-finger-pip-flex-r1"></td>
+                        <td><input type="text" name="ue-finger-pip-flex-r2"></td>
+                        <td><input type="text" name="ue-finger-pip-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-finger-dip-flex-l1"></td>
+                        <td><input type="text" name="ue-finger-dip-flex-l2"></td>
+                        <td><input type="text" name="ue-finger-dip-flex-l3"></td>
+                        <td class="muscle-name">Finger distal interphalangeal flexion</td>
+                        <td><input type="text" name="ue-finger-dip-flex-r1"></td>
+                        <td><input type="text" name="ue-finger-dip-flex-r2"></td>
+                        <td><input type="text" name="ue-finger-dip-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-finger-mcp-ext-l1"></td>
+                        <td><input type="text" name="ue-finger-mcp-ext-l2"></td>
+                        <td><input type="text" name="ue-finger-mcp-ext-l3"></td>
+                        <td class="muscle-name">Finger metacarpophalangeal extension</td>
+                        <td><input type="text" name="ue-finger-mcp-ext-r1"></td>
+                        <td><input type="text" name="ue-finger-mcp-ext-r2"></td>
+                        <td><input type="text" name="ue-finger-mcp-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-finger-abd-l1"></td>
+                        <td><input type="text" name="ue-finger-abd-l2"></td>
+                        <td><input type="text" name="ue-finger-abd-l3"></td>
+                        <td class="muscle-name">Finger abduction</td>
+                        <td><input type="text" name="ue-finger-abd-r1"></td>
+                        <td><input type="text" name="ue-finger-abd-r2"></td>
+                        <td><input type="text" name="ue-finger-abd-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-finger-add-l1"></td>
+                        <td><input type="text" name="ue-finger-add-l2"></td>
+                        <td><input type="text" name="ue-finger-add-l3"></td>
+                        <td class="muscle-name">Finger adduction</td>
+                        <td><input type="text" name="ue-finger-add-r1"></td>
+                        <td><input type="text" name="ue-finger-add-r2"></td>
+                        <td><input type="text" name="ue-finger-add-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-mcp-flex-l1"></td>
+                        <td><input type="text" name="ue-thumb-mcp-flex-l2"></td>
+                        <td><input type="text" name="ue-thumb-mcp-flex-l3"></td>
+                        <td class="muscle-name">Thumb metacarpophalangeal flexion</td>
+                        <td><input type="text" name="ue-thumb-mcp-flex-r1"></td>
+                        <td><input type="text" name="ue-thumb-mcp-flex-r2"></td>
+                        <td><input type="text" name="ue-thumb-mcp-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-ip-flex-l1"></td>
+                        <td><input type="text" name="ue-thumb-ip-flex-l2"></td>
+                        <td><input type="text" name="ue-thumb-ip-flex-l3"></td>
+                        <td class="muscle-name">Thumb interphalangeal flexion</td>
+                        <td><input type="text" name="ue-thumb-ip-flex-r1"></td>
+                        <td><input type="text" name="ue-thumb-ip-flex-r2"></td>
+                        <td><input type="text" name="ue-thumb-ip-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-mcp-ext-l1"></td>
+                        <td><input type="text" name="ue-thumb-mcp-ext-l2"></td>
+                        <td><input type="text" name="ue-thumb-mcp-ext-l3"></td>
+                        <td class="muscle-name">Thumb metacarpophalangeal extension</td>
+                        <td><input type="text" name="ue-thumb-mcp-ext-r1"></td>
+                        <td><input type="text" name="ue-thumb-mcp-ext-r2"></td>
+                        <td><input type="text" name="ue-thumb-mcp-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-ip-ext-l1"></td>
+                        <td><input type="text" name="ue-thumb-ip-ext-l2"></td>
+                        <td><input type="text" name="ue-thumb-ip-ext-l3"></td>
+                        <td class="muscle-name">Thumb interphalangeal extension</td>
+                        <td><input type="text" name="ue-thumb-ip-ext-r1"></td>
+                        <td><input type="text" name="ue-thumb-ip-ext-r2"></td>
+                        <td><input type="text" name="ue-thumb-ip-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-abd-l1"></td>
+                        <td><input type="text" name="ue-thumb-abd-l2"></td>
+                        <td><input type="text" name="ue-thumb-abd-l3"></td>
+                        <td class="muscle-name">Thumb abduction</td>
+                        <td><input type="text" name="ue-thumb-abd-r1"></td>
+                        <td><input type="text" name="ue-thumb-abd-r2"></td>
+                        <td><input type="text" name="ue-thumb-abd-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-add-l1"></td>
+                        <td><input type="text" name="ue-thumb-add-l2"></td>
+                        <td><input type="text" name="ue-thumb-add-l3"></td>
+                        <td class="muscle-name">Thumb adduction</td>
+                        <td><input type="text" name="ue-thumb-add-r1"></td>
+                        <td><input type="text" name="ue-thumb-add-r2"></td>
+                        <td><input type="text" name="ue-thumb-add-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="ue-thumb-opp-l1"></td>
+                        <td><input type="text" name="ue-thumb-opp-l2"></td>
+                        <td><input type="text" name="ue-thumb-opp-l3"></td>
+                        <td class="muscle-name">Thumb opposition</td>
+                        <td><input type="text" name="ue-thumb-opp-r1"></td>
+                        <td><input type="text" name="ue-thumb-opp-r2"></td>
+                        <td><input type="text" name="ue-thumb-opp-r3"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="7" class="category-header">LOWER EXTREMITY</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-hip-flex-l1"></td>
+                        <td><input type="text" name="le-hip-flex-l2"></td>
+                        <td><input type="text" name="le-hip-flex-l3"></td>
+                        <td class="muscle-name">Hip flexion</td>
+                        <td><input type="text" name="le-hip-flex-r1"></td>
+                        <td><input type="text" name="le-hip-flex-r2"></td>
+                        <td><input type="text" name="le-hip-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-hip-ext-l1"></td>
+                        <td><input type="text" name="le-hip-ext-l2"></td>
+                        <td><input type="text" name="le-hip-ext-l3"></td>
+                        <td class="muscle-name">Hip extension</td>
+                        <td><input type="text" name="le-hip-ext-r1"></td>
+                        <td><input type="text" name="le-hip-ext-r2"></td>
+                        <td><input type="text" name="le-hip-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-hip-abd-l1"></td>
+                        <td><input type="text" name="le-hip-abd-l2"></td>
+                        <td><input type="text" name="le-hip-abd-l3"></td>
+                        <td class="muscle-name">Hip abduction</td>
+                        <td><input type="text" name="le-hip-abd-r1"></td>
+                        <td><input type="text" name="le-hip-abd-r2"></td>
+                        <td><input type="text" name="le-hip-abd-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-hip-add-l1"></td>
+                        <td><input type="text" name="le-hip-add-l2"></td>
+                        <td><input type="text" name="le-hip-add-l3"></td>
+                        <td class="muscle-name">Hip adduction</td>
+                        <td><input type="text" name="le-hip-add-r1"></td>
+                        <td><input type="text" name="le-hip-add-r2"></td>
+                        <td><input type="text" name="le-hip-add-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-hip-ext-rot-l1"></td>
+                        <td><input type="text" name="le-hip-ext-rot-l2"></td>
+                        <td><input type="text" name="le-hip-ext-rot-l3"></td>
+                        <td class="muscle-name">Hip external rotation</td>
+                        <td><input type="text" name="le-hip-ext-rot-r1"></td>
+                        <td><input type="text" name="le-hip-ext-rot-r2"></td>
+                        <td><input type="text" name="le-hip-ext-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-hip-int-rot-l1"></td>
+                        <td><input type="text" name="le-hip-int-rot-l2"></td>
+                        <td><input type="text" name="le-hip-int-rot-l3"></td>
+                        <td class="muscle-name">Hip internal rotation</td>
+                        <td><input type="text" name="le-hip-int-rot-r1"></td>
+                        <td><input type="text" name="le-hip-int-rot-r2"></td>
+                        <td><input type="text" name="le-hip-int-rot-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-knee-flex-l1"></td>
+                        <td><input type="text" name="le-knee-flex-l2"></td>
+                        <td><input type="text" name="le-knee-flex-l3"></td>
+                        <td class="muscle-name">Knee flexion</td>
+                        <td><input type="text" name="le-knee-flex-r1"></td>
+                        <td><input type="text" name="le-knee-flex-r2"></td>
+                        <td><input type="text" name="le-knee-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-knee-ext-l1"></td>
+                        <td><input type="text" name="le-knee-ext-l2"></td>
+                        <td><input type="text" name="le-knee-ext-l3"></td>
+                        <td class="muscle-name">Knee extension</td>
+                        <td><input type="text" name="le-knee-ext-r1"></td>
+                        <td><input type="text" name="le-knee-ext-r2"></td>
+                        <td><input type="text" name="le-knee-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-ankle-dorsi-l1"></td>
+                        <td><input type="text" name="le-ankle-dorsi-l2"></td>
+                        <td><input type="text" name="le-ankle-dorsi-l3"></td>
+                        <td class="muscle-name">Ankle dorsiflexion</td>
+                        <td><input type="text" name="le-ankle-dorsi-r1"></td>
+                        <td><input type="text" name="le-ankle-dorsi-r2"></td>
+                        <td><input type="text" name="le-ankle-dorsi-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-ankle-plantar-l1"></td>
+                        <td><input type="text" name="le-ankle-plantar-l2"></td>
+                        <td><input type="text" name="le-ankle-plantar-l3"></td>
+                        <td class="muscle-name">Ankle plantar flexion</td>
+                        <td><input type="text" name="le-ankle-plantar-r1"></td>
+                        <td><input type="text" name="le-ankle-plantar-r2"></td>
+                        <td><input type="text" name="le-ankle-plantar-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-inversion-l1"></td>
+                        <td><input type="text" name="le-inversion-l2"></td>
+                        <td><input type="text" name="le-inversion-l3"></td>
+                        <td class="muscle-name">Inversion</td>
+                        <td><input type="text" name="le-inversion-r1"></td>
+                        <td><input type="text" name="le-inversion-r2"></td>
+                        <td><input type="text" name="le-inversion-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-eversion-l1"></td>
+                        <td><input type="text" name="le-eversion-l2"></td>
+                        <td><input type="text" name="le-eversion-l3"></td>
+                        <td class="muscle-name">Eversion</td>
+                        <td><input type="text" name="le-eversion-r1"></td>
+                        <td><input type="text" name="le-eversion-r2"></td>
+                        <td><input type="text" name="le-eversion-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-toes-mtp-flex-l1"></td>
+                        <td><input type="text" name="le-toes-mtp-flex-l2"></td>
+                        <td><input type="text" name="le-toes-mtp-flex-l3"></td>
+                        <td class="muscle-name">Flexion MTP (Toes)</td>
+                        <td><input type="text" name="le-toes-mtp-flex-r1"></td>
+                        <td><input type="text" name="le-toes-mtp-flex-r2"></td>
+                        <td><input type="text" name="le-toes-mtp-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-toes-ip-flex-l1"></td>
+                        <td><input type="text" name="le-toes-ip-flex-l2"></td>
+                        <td><input type="text" name="le-toes-ip-flex-l3"></td>
+                        <td class="muscle-name">Flexion IP (Toes)</td>
+                        <td><input type="text" name="le-toes-ip-flex-r1"></td>
+                        <td><input type="text" name="le-toes-ip-flex-r2"></td>
+                        <td><input type="text" name="le-toes-ip-flex-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-toes-mtp-ext-l1"></td>
+                        <td><input type="text" name="le-toes-mtp-ext-l2"></td>
+                        <td><input type="text" name="le-toes-mtp-ext-l3"></td>
+                        <td class="muscle-name">Extension MTP (Toes)</td>
+                        <td><input type="text" name="le-toes-mtp-ext-r1"></td>
+                        <td><input type="text" name="le-toes-mtp-ext-r2"></td>
+                        <td><input type="text" name="le-toes-mtp-ext-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-toes-ip-ext-l1"></td>
+                        <td><input type="text" name="le-toes-ip-ext-l2"></td>
+                        <td><input type="text" name="le-toes-ip-ext-l3"></td>
+                        <td class="muscle-name">Extension IP (Toes)</td>
+                        <td><input type="text" name="le-toes-ip-ext-r1"></td>
+                        <td><input type="text" name="le-toes-ip-ext-r2"></td>
+                        <td><input type="text" name="le-toes-ip-ext-r3"></td>
+                    </tr>
+                     <tr>
+                        <td><input type="text" name="le-toes-abd-l1"></td>
+                        <td><input type="text" name="le-toes-abd-l2"></td>
+                        <td><input type="text" name="le-toes-abd-l3"></td>
+                        <td class="muscle-name">Abduction (Toes)</td>
+                        <td><input type="text" name="le-toes-abd-r1"></td>
+                        <td><input type="text" name="le-toes-abd-r2"></td>
+                        <td><input type="text" name="le-toes-abd-r3"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="le-toes-add-l1"></td>
+                        <td><input type="text" name="le-toes-add-l2"></td>
+                        <td><input type="text" name="le-toes-add-l3"></td>
+                        <td class="muscle-name">Adduction (Toes)</td>
+                        <td><input type="text" name="le-toes-add-r1"></td>
+                        <td><input type="text" name="le-toes-add-r2"></td>
+                        <td><input type="text" name="le-toes-add-r3"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>II. Range of Motion Record </h2>
+
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">SHOULDER</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-shoulder-flex-l"></td>
+                    <td class="motion-name">Flexion</td>
+                    <td><input type="text" name="rom-shoulder-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-shoulder-ext-l"></td>
+                    <td class="motion-name">Extension</td>
+                    <td><input type="text" name="rom-shoulder-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-shoulder-abd-l"></td>
+                    <td class="motion-name">Abduction</td>
+                    <td><input type="text" name="rom-shoulder-abd-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-shoulder-add-l"></td>
+                    <td class="motion-name">Adduction</td>
+                    <td><input type="text" name="rom-shoulder-add-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-shoulder-int-rot-l"></td>
+                    <td class="motion-name">Internal Rotation</td>
+                    <td><input type="text" name="rom-shoulder-int-rot-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-shoulder-ext-rot-l"></td>
+                    <td class="motion-name">External Rotation</td>
+                    <td><input type="text" name="rom-shoulder-ext-rot-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-shoulder-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">ELBOW</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-elbow-flex-l"></td>
+                    <td class="motion-name">Flexion</td>
+                    <td><input type="text" name="rom-elbow-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-elbow-ext-l"></td>
+                    <td class="motion-name">Extension</td>
+                    <td><input type="text" name="rom-elbow-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-elbow-pro-l"></td>
+                    <td class="motion-name">Pronation</td>
+                    <td><input type="text" name="rom-elbow-pro-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-elbow-sup-l"></td>
+                    <td class="motion-name">Supination</td>
+                    <td><input type="text" name="rom-elbow-sup-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-elbow-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">WRIST</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-wrist-flex-l"></td>
+                    <td class="motion-name">Flexion</td>
+                    <td><input type="text" name="rom-wrist-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-wrist-ext-l"></td>
+                    <td class="motion-name">Extension</td>
+                    <td><input type="text" name="rom-wrist-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-wrist-ulnar-l"></td>
+                    <td class="motion-name">Ulnar Deviation</td>
+                    <td><input type="text" name="rom-wrist-ulnar-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-wrist-radial-l"></td>
+                    <td class="motion-name">Radial Deviation</td>
+                    <td><input type="text" name="rom-wrist-radial-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-wrist-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">HAND & FINGERS</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-finger-mcp-flex-l"></td>
+                    <td class="motion-name">MCP Flexion</td>
+                    <td><input type="text" name="rom-finger-mcp-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-finger-mcp-ext-l"></td>
+                    <td class="motion-name">MCP Extension</td>
+                    <td><input type="text" name="rom-finger-mcp-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-finger-pip-flex-l"></td>
+                    <td class="motion-name">PIP Flexion</td>
+                    <td><input type="text" name="rom-finger-pip-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-finger-pip-ext-l"></td>
+                    <td class="motion-name">PIP Extension</td>
+                    <td><input type="text" name="rom-finger-pip-ext-r"></td>
+                </tr>
+                 <tr>
+                    <td><input type="text" name="rom-finger-dip-flex-l"></td>
+                    <td class="motion-name">DIP Flexion</td>
+                    <td><input type="text" name="rom-finger-dip-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-finger-dip-ext-l"></td>
+                    <td class="motion-name">DIP Extension</td>
+                    <td><input type="text" name="rom-finger-dip-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-thumb-mcp-flex-l"></td>
+                    <td class="motion-name sub-category">Thumb MCP Flexion</td>
+                    <td><input type="text" name="rom-thumb-mcp-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-thumb-mcp-ext-l"></td>
+                    <td class="motion-name sub-category">Thumb MCP Extension</td>
+                    <td><input type="text" name="rom-thumb-mcp-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-thumb-ip-flex-l"></td>
+                    <td class="motion-name sub-category">Thumb IP Flexion</td>
+                    <td><input type="text" name="rom-thumb-ip-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-thumb-ip-ext-l"></td>
+                    <td class="motion-name sub-category">Thumb IP Extension</td>
+                    <td><input type="text" name="rom-thumb-ip-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-thumb-abd-l"></td>
+                    <td class="motion-name sub-category">Thumb Abduction</td>
+                    <td><input type="text" name="rom-thumb-abd-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-thumb-opp-l"></td>
+                    <td class="motion-name sub-category">Thumb Opposition</td>
+                    <td><input type="text" name="rom-thumb-opp-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-hand-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- LOWER EXTREMITY Range of Motion Tables -->
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">HIP</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-hip-flex-l"></td>
+                    <td class="motion-name">Flexion</td>
+                    <td><input type="text" name="rom-hip-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-hip-ext-l"></td>
+                    <td class="motion-name">Extension</td>
+                    <td><input type="text" name="rom-hip-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-hip-abd-l"></td>
+                    <td class="motion-name">Abduction</td>
+                    <td><input type="text" name="rom-hip-abd-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-hip-add-l"></td>
+                    <td class="motion-name">Adduction</td>
+                    <td><input type="text" name="rom-hip-add-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-hip-int-rot-l"></td>
+                    <td class="motion-name">Internal Rotation</td>
+                    <td><input type="text" name="rom-hip-int-rot-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-hip-ext-rot-l"></td>
+                    <td class="motion-name">External Rotation</td>
+                    <td><input type="text" name="rom-hip-ext-rot-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-hip-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">KNEE</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-knee-flex-l"></td>
+                    <td class="motion-name">Flexion</td>
+                    <td><input type="text" name="rom-knee-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-knee-ext-l"></td>
+                    <td class="motion-name">Extension</td>
+                    <td><input type="text" name="rom-knee-ext-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-knee-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">ANKLE</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-ankle-dorsi-l"></td>
+                    <td class="motion-name">Dorsiflexion</td>
+                    <td><input type="text" name="rom-ankle-dorsi-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-ankle-plantar-l"></td>
+                    <td class="motion-name">Plantarflexion</td>
+                    <td><input type="text" name="rom-ankle-plantar-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-ankle-inv-l"></td>
+                    <td class="motion-name">Inversion</td>
+                    <td><input type="text" name="rom-ankle-inv-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-ankle-ev-l"></td>
+                    <td class="motion-name">Eversion</td>
+                    <td><input type="text" name="rom-ankle-ev-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-ankle-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="examination-table rom-table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="category-header">TOES</th>
+                </tr>
+                <tr>
+                    <th>Left</th>
+                    <th>Motion</th>
+                    <th>Right</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="rom-toes-mtp-flex-l"></td>
+                    <td class="motion-name">MTP Flexion</td>
+                    <td><input type="text" name="rom-toes-mtp-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-toes-mtp-ext-l"></td>
+                    <td class="motion-name">MTP Extension</td>
+                    <td><input type="text" name="rom-toes-mtp-ext-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-toes-ip-flex-l"></td>
+                    <td class="motion-name">IP Flexion</td>
+                    <td><input type="text" name="rom-toes-ip-flex-r"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="rom-toes-ip-ext-l"></td>
+                    <td class="motion-name">IP Extension</td>
+                    <td><input type="text" name="rom-toes-ip-ext-r"></td>
+                </tr>
+                <tr class="comments-row">
+                    <td colspan="2"><input type="text" name="rom-toes-comments" placeholder="Enter comments..."></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="form-actions">
+            <button type="submit">Submit Assessment</button>
+        </div>
+
+    </form>
+
+</body>
+</html>

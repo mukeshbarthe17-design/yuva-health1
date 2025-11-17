@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Appointment</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #111;
+            margin-bottom: 2.5rem;
+            font-size: 1.8rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h2 {
+            font-size: 1.25rem;
+            color: #005a9c;
+            border-bottom: 2px solid #f0f4f8;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        /* Class to make a field span both columns */
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box; 
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* File Upload Styling */
+        input[type="file"] {
+            padding: 0.5rem;
+            background: #f9f9f9;
+        }
+
+        #upload-status {
+            font-size: 0.9rem;
+            color: #006633;
+            margin-top: 0.5rem;
+            display: none; /* Hidden by default */
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .form-container {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <form id="appointment-form">
+            <h1>Book Your Appointment</h1>
+
+            
+
+            <div class="form-section">
+                <h2>Personal Information</h2>
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label for="full-name">Full Name *</label>
+                        <input type="text" id="full-name" name="full-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age">
+                    </div>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth *</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                            <option value="not-specified">Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Contact Information</h2>
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" placeholder="Enter street address, city, state, zip code"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Emergency Contact</h2>
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label for="emergency-name">Emergency Contact Name</label>
+                        <input type="text" id="emergency-name" name="emergency-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="emergency-phone">Emergency Contact Phone</label>
+                        <input type="tel" id="emergency-phone" name="emergency-phone">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Appointment Details</h2>
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label for="preferred-date">Preferred Date *</label>
+                        <input type="date" id="preferred-date" name="preferred-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferred-time">Preferred Time (15-minute slots)</label>
+                        <input type="time" id="preferred-time" name="preferred-time" step="900">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="chief-complaint">Chief Complaint</label>
+                        <textarea id="chief-complaint" name="chief-complaint" placeholder="Describe your symptoms or reason for visit"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" id="upload-section">
+                <h2>Upload Previous Report</h2>
+                <div class="form-group full-width">
+                    <label for="file-upload">Upload previous report (PDF or Image)</label>
+                    <input type="file" id="file-upload" accept="image/*, .pdf">
+                    <div id="upload-status"></div>
+                    <div id="old-report-status" style="display:none; margin-top:0.5rem; font-size:0.9rem; color:#333;"></div>
+                    <div id="old-report-actions" style="display:none; margin-top:0.5rem;">
+                        <button type="button" id="download-old-report" style="margin-right:0.5rem;">Download old report</button>
+                        <button type="button" id="clear-old-report" style="background:#fff; border:1px solid #ccc;">Remove old report</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Continue to Registration</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileUpload = document.getElementById('file-upload');
+            const uploadStatus = document.getElementById('upload-status');
+            const oldReportStatus = document.getElementById('old-report-status');
+            const oldReportActions = document.getElementById('old-report-actions');
+            const downloadOldBtn = document.getElementById('download-old-report');
+            const clearOldBtn = document.getElementById('clear-old-report');
+            let dbRef = null;
+            let oldReportUrl = null;
+            
+            // Initialize storage and try to load existing old report
+            initDB().then(db => {
+                dbRef = db;
+                return getOldReport(dbRef);
+            }).then(record => {
+                if (record) {
+                    renderOldReport(record);
+                }
+            }).catch(err => {
+                console.warn('IndexedDB unavailable, old report persistence disabled:', err);
+            });
+            
+            // Listen for a file to be selected
+            fileUpload.addEventListener('change', handleFileUpload);
+            
+            function handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) {
+                    return;
+                }
+
+                // Save as the 'old report' for future sessions
+                if (dbRef) {
+                    saveOldReport(dbRef, file)
+                        .then(record => {
+                            renderOldReport(record);
+                        })
+                        .catch(err => console.error('Failed to save old report:', err));
+                }
+                
+                uploadStatus.textContent = `Analyzing file: ${file.name}...`;
+                uploadStatus.style.display = 'block';
+
+                // --- THIS IS THE SIMULATION ---
+                // In a real app, you would send the 'file' object to your server here.
+                // We will use setTimeout to simulate the server's analysis delay.
+                
+                simulateServerAnalysis(file)
+                    .then(data => {
+                        // Success! We got data back from the "server"
+                        uploadStatus.textContent = `Successfully extracted data from ${file.name}!`;
+                        uploadStatus.style.color = '#006633';
+                        
+                        // Fill the form fields
+                        fillFormWithData(data);
+                    })
+                    .catch(error => {
+                        // Handle error
+                        uploadStatus.textContent = `Could not analyze file. ${error}`;
+                        uploadStatus.style.color = '#D8000C';
+                    });
+            }
+
+            // --- Old Report Persistence (IndexedDB) ---
+            function initDB() {
+                return new Promise((resolve, reject) => {
+                    if (!('indexedDB' in window)) {
+                        reject('IndexedDB not supported');
+                        return;
+                    }
+                    const request = indexedDB.open('physioFormDB', 1);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('reports')) {
+                            db.createObjectStore('reports', { keyPath: 'id' });
+                        }
+                    };
+                });
+            }
+
+            function saveOldReport(db, file) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('reports', 'readwrite');
+                    const store = tx.objectStore('reports');
+                    const record = {
+                        id: 'oldReport',
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        lastModified: file.lastModified || Date.now(),
+                        data: file
+                    };
+                    store.put(record);
+                    tx.oncomplete = () => resolve(record);
+                    tx.onerror = () => reject(tx.error);
+                });
+            }
+
+            function getOldReport(db) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('reports', 'readonly');
+                    const store = tx.objectStore('reports');
+                    const req = store.get('oldReport');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            function clearOldReport(db) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('reports', 'readwrite');
+                    const store = tx.objectStore('reports');
+                    const req = store.delete('oldReport');
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            }
+
+            function renderOldReport(record) {
+                // Revoke previous URL if any
+                if (oldReportUrl) {
+                    URL.revokeObjectURL(oldReportUrl);
+                    oldReportUrl = null;
+                }
+                if (!record) {
+                    oldReportStatus.style.display = 'none';
+                    oldReportActions.style.display = 'none';
+                    return;
+                }
+                const sizeKB = Math.max(1, Math.round(record.size / 1024));
+                oldReportStatus.textContent = `Old report on file: ${record.name} (${sizeKB} KB)`;
+                oldReportStatus.style.display = 'block';
+                oldReportActions.style.display = 'block';
+                if (record.data) {
+                    oldReportUrl = URL.createObjectURL(record.data);
+                    downloadOldBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = oldReportUrl;
+                        a.download = record.name || 'old-report';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+                }
+            }
+
+            clearOldBtn.addEventListener('click', () => {
+                if (!dbRef) return;
+                clearOldReport(dbRef)
+                    .then(() => renderOldReport(null))
+                    .catch(err => console.error('Failed to clear old report:', err));
+            });
+
+            function simulateServerAnalysis(file) {
+                console.log("Simulating server-side OCR analysis...");
+                
+                // Return a Promise, which is what a real server request (fetch) would do.
+                return new Promise((resolve, reject) => {
+                    // Wait for 2.5 seconds to mimic analysis time
+                    setTimeout(() => {
+                        // Create fake extracted data
+                        const extractedData = {
+                            name: "Jane R. Doe (from file)",
+                            dob: "1990-05-15",
+                            phone: "+15551234567",
+                            email: "jane.doe.file@example.com",
+                            complaint: "Persistent lower back pain (from report)."
+                        };
+                        
+                        // Randomly "fail" 10% of the time to show error handling
+                        if (Math.random() < 0.1) {
+                            reject("File is unreadable.");
+                        } else {
+                            // Successfully resolve with the fake data
+                            resolve(extractedData);
+                        }
+                    }, 2500);
+                });
+            }
+
+            function fillFormWithData(data) {
+                // Use the data object to set the values of the form fields
+                if (data.name) {
+                    document.getElementById('full-name').value = data.name;
+                }
+                if (data.dob) {
+                    document.getElementById('dob').value = data.dob;
+                }
+                if (data.phone) {
+                    document.getElementById('phone').value = data.phone;
+                }
+                if (data.email) {
+                    document.getElementById('email').value = data.email;
+                }
+                if (data.complaint) {
+                    document.getElementById('chief-complaint').value = data.complaint;
+                }
+            }
+            
+            // Handle the final form submission
+            document.getElementById('appointment-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Appointment form submitted! (Demo)');
+                // In a real app, you would send all the form data to your server here.
+            });
+        });
+    </script>
+
+</body>
+</html>
